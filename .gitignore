@@ -1,0 +1,15 @@
+SnakeGameV2/SnakeGameFrontend/appsettings.json
+SnakeGameV2/SnakeGameFrontend/bin/*
+SnakeGameV2/SnakeGameFrontend/obj/*
+SnakeGameV2/SnakeGameFrontend/.vs/*
+
+SnakeGameV2/SnakeGameBackend/DigiCertGlobalRootCA.crt.pem
+SnakeGameV2/SnakeGameBackend/appsettings.json
+SnakeGameV2/SnakeGameBackend/bin/*
+SnakeGameV2/SnakeGameBackend/wwwroot/*
+SnakeGameV2/SnakeGameBackend/obj/*
+SnakeGameV2/SnakeGameBackend/.vs/*
+.vs/*
+*.map
+*.log
+*.bin

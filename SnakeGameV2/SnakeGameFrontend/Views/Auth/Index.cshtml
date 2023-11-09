@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Login page";
+}
+
+@*solicitar un nombre de usuario*@
+
+<h2>Nickname</h2>
+<form asp-controller="Auth" asp-action="LogIn" method="post">
+    <input type="text" name="pNickname" />
+    <input type="submit" value="Submit"  class="btn btn-primary"/>
+</form>
