@@ -58,8 +58,6 @@ namespace SnakeGameFrontend.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ci), ap);
 
-
-            ViewBag.Usuario = jugador;
             return RedirectToAction("Index", "Home");
         }
 

@@ -1,0 +1,31 @@
+﻿@model IEnumerable<SnakeGameFrontend.Models.Ranking>
+
+@{
+    ViewBag.Title = "Ranking";
+}
+
+<h1>Ranking</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Ganador</th>
+            <th scope="col">Largo</th>
+            <th scope="col">Tematica</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Identificador de partida</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Ganador</td>
+                <td>@item.Largo</td>
+                <td>@item.Tematica</td>
+                <td>@item.Tipo</td>
+                <td>@item.IdentificadorPartida</td>
+            </tr>
+        }
+    </tbody>
+</table>

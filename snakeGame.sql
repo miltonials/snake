@@ -126,3 +126,46 @@ ALTER TABLE Jugadores ADD CONSTRAINT u_nickname UNIQUE (Nickname);
 
 select * from Jugadores;
 SELECT * FROM ranking;
+
+
+-- Tabla de Jugadores
+INSERT INTO Jugadores (Nickname) VALUES ('player1'), ('player2'), ('player3'), ('player4'), ('player5'), ('player6'), ('player7'), ('player8'), ('player9'), ('player10');
+
+-- Tabla de Partidas
+INSERT INTO Partidas (CodigoIdentificador, TipoJuego, Tematica, TiempoRestante, LargoObjetivo, Estado) VALUES 
+('ABC123', 1, 1, 300, NULL, 2),
+('DEF456', 2, 1, NULL, 10, 0),
+('GHI789', 1, 1, 600, NULL, 1),
+('JKL012', 2, 1, NULL, 15, 2),
+('MNO345', 1, 1, 450, NULL, 0),
+('PQR678', 2, 1, NULL, 12, 2),
+('STU901', 1, 1, 240, NULL, 1),
+('VWX234', 2, 1, NULL, 8, 2),
+('YZA567', 1, 1, 180, NULL, 0),
+('BCD890', 2, 1, NULL, 20, 1);
+
+-- Tabla de JugadoresXPartida
+INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente) VALUES
+(1, 1, 'Blue', 1),
+(1, 2, 'Red', 1),
+(1, 3, 'Green', 1),
+(2, 4, 'Yellow', 1),
+(2, 5, 'Purple', 1),
+(2, 6, 'Orange', 1),
+(3, 7, 'Pink', 1),
+(3, 8, 'Cyan', 1),
+(3, 9, 'Brown', 1),
+(4, 10, 'White', 1);
+
+-- Tabla de Ganadores
+INSERT INTO Ganadores (PartidaID, JugadorXPartidaID) VALUES
+(1, 1),
+(2, 5),
+(3, 9),
+(4, 6),
+(5, 3),
+(6, 7),
+(7, 8),
+(8, 2),
+(9, 4),
+(10, 10);
