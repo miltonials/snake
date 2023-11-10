@@ -1,0 +1,74 @@
+﻿@model int
+
+@{
+    ViewBag.Title = "Room";
+    //ViewBag.Jugador
+    Jugador jugador = ViewBag.Jugador;
+}
+
+<h1>@SnakeGameFrontend.Controllers.ChatController.Rooms.GetValueOrDefault(Model)</h1>
+
+<div class="row">
+
+    <div class="col-md-8 offset-2">
+
+        <h2>Chat</h2>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div id="chat" class="chat">
+                    <div id="messages" class="messages">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <input id="message" type="text" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+        <div class="col-md-12">
+            <button id="btnSend" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/latest/signalr.min.js"></script>*@
+
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
+    connection.start().then(() => {
+        console.log("connected");
+        connection.invoke("JoinRoom", "@Model")
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    document.getElementById("btnSend").addEventListener("click", function (event) {
+        let room = "@Model";
+        let user = "@jugador.Nickname"
+        let message = document.getElementById("message").value;
+
+        connection.invoke("SendMessage", room, user, message)
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+
+        document.getElementById("message").value = "";
+
+        event.preventDefault();
+    });
+
+    connection.on("ReceiveMessage", function (user, message) {
+        let msg = document.createElement("div");
+        msg.innerHTML = `<strong>${user}</strong>: ${message}`;
+        document.getElementById("messages").appendChild(msg);
+    });
+</script>

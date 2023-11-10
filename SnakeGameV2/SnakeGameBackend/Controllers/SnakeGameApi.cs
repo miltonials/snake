@@ -62,12 +62,12 @@ namespace SnakeGameBackend.Controllers
 
         //una funcion que busque un Jugador especifico
         [HttpGet("GetPlayer")]
-        public Jugador GetPlayer(string pNickname)
+        public Jugador GetPlayer(string nickname)
         {
             MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
             using var connection = mssqlSingleton.GetConnection();
             SqlCommand command = new("select * from Jugadores where Nickname = @nickname", connection);
-            command.Parameters.AddWithValue("@nickname", pNickname);
+            command.Parameters.AddWithValue("@nickname", nickname);
             SqlDataReader reader = command.ExecuteReader();
             Jugador registro = new();
             while (reader.Read())

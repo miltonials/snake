@@ -12,17 +12,18 @@ namespace SnakeGameFrontend.Controllers
     public class AuthController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _contextAccessor;
         public AuthController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
+            _contextAccessor = httpContextAccessor;
         }
         public IActionResult Index()
         {
-            ClaimsPrincipal c = _httpContextAccessor.HttpContext.User;
+            ClaimsPrincipal c = _contextAccessor.HttpContext.User;
             if (c.Identity != null && c.Identity.IsAuthenticated)
             {
+                ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
                 return RedirectToAction("Index", "Home");
             }
             return View();

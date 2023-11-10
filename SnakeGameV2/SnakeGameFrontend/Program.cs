@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthController>();
@@ -14,8 +15,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/";
     });
-
 builder.Services.AddHttpClient();
+
 
 var app = builder.Build();
 
@@ -40,7 +41,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Index}");
 
-app.MapHub<SnakeGameHub>("/snakeGame");
+//app.MapHub<SnakeGameHub>("/snakeGame");
+app.MapHub<SnakeGameHub>("/chat");
 
 
 app.Run();
