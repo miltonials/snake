@@ -29,5 +29,13 @@ namespace SnakeGameFrontend.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        // redirecciona a la pagina de crear partida
+        public IActionResult CreateGame()
+        {
+            ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
+            return RedirectToAction("Crear", "Partida");
+        }
+
     }
 }

@@ -7,16 +7,15 @@
 <h1>Snake game</h1>
 <h3>Menú principal</h3>
 <p>Bienvenido @ViewBag.Jugador.Nickname</p>
-
 <main class="container d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
     <div class="row">
         <div class="col-12 d-flex justify-content-center">
-            <button class="btn btn-primary">Crear partida</button>
+            <a class="btn btn-primary" asp-controller="Partida" asp-action="Crear">Crear partida</a>
         </div>
     </div>
     <div class="row">
         <div class="col-12 d-flex justify-content-center">
-            <button class="btn btn-primary">Unirse a una partida</button>
+            <a class="btn btn-primary" >Unirse a una partida</a>
         </div>
     </div>
     <div class="row">

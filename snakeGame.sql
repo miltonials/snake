@@ -121,6 +121,8 @@ BEGIN
     ');
 END
 
+
+
 ALTER TABLE Jugadores ADD CONSTRAINT u_nickname UNIQUE (Nickname);
 
 
@@ -169,3 +171,63 @@ INSERT INTO Ganadores (PartidaID, JugadorXPartidaID) VALUES
 (8, 2),
 (9, 4),
 (10, 10);
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_InsertarPartida')
+BEGIN
+EXEC('
+    CREATE PROCEDURE sp_InsertarPartida
+        @CodigoIdentificador NVARCHAR(10),
+        @Tipo INT,
+        @Extension INT,
+        @Tematica INT
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+
+        -- Verifica que el Tipo sea válido
+        IF @Tipo NOT IN (1, 2)
+        BEGIN
+            THROW 50000, "El Tipo proporcionado no es válido.", 1;
+            RETURN;
+        END
+
+        -- Verifica que la Extensión sea válida (puedes extender la validación según sea necesario)
+        IF @Extension IS NULL
+        BEGIN
+            THROW 50000, 'La Extensión es obligatoria.', 1;
+            RETURN;
+        END
+
+        -- Verifica que la Temática sea válida (puedes extender la validación según sea necesario)
+        IF @Tematica IS NULL
+        BEGIN
+            THROW 50000, 'La Temática es obligatoria.', 1;
+            RETURN;
+        END
+
+        -- Inserta la nueva partida
+        INSERT INTO Partidas (CodigoIdentificador, TipoJuego, Tematica, TiempoRestante, LargoObjetivo, Estado)
+        VALUES (@CodigoIdentificador, @Tipo, @Tematica, 
+                CASE WHEN @Tipo = 1 THEN @Extension ELSE NULL END, -- TiempoRestante
+                CASE WHEN @Tipo = 2 THEN @Extension ELSE NULL END, -- LargoObjetivo
+                0); -- Inicializa el Estado con 0
+    END;
+	');
+END
+
+-- Declarar variables de parámetros
+DECLARE @CodigoIdentificador NVARCHAR(10) = 'ABC123';
+DECLARE @Tipo INT = 1;
+DECLARE @Extension INT = 30;
+DECLARE @Tematica INT = 5;
+DECLARE @Cantidad INT = 2;
+
+-- Ejecutar el procedimiento almacenado
+EXEC sp_InsertarPartida
+    @CodigoIdentificador = @CodigoIdentificador,
+    @Tipo = @Tipo,
+    @Extension = @Extension,
+    @Tematica = @Tematica,
+    @Cantidad = @Cantidad;
+
+SELECT * FROM Partidas;
