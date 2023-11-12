@@ -11,5 +11,6 @@
         public int? Tematica { get; set; }
         public int? JugadorId { get; set; }
         public Jugador? Jugador { get; set; }
+        public int Estado { get; internal set; }
     }
 }

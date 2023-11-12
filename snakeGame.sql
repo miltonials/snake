@@ -174,60 +174,48 @@ INSERT INTO Ganadores (PartidaID, JugadorXPartidaID) VALUES
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_InsertarPartida')
 BEGIN
-EXEC('
+    EXEC('
     CREATE PROCEDURE sp_InsertarPartida
-        @CodigoIdentificador NVARCHAR(10),
-        @Tipo INT,
+        @TipoJuego INT,
         @Extension INT,
-        @Tematica INT
+        @Tematica INT,
+        @CodigoIdentificador NVARCHAR(10)
+       
     AS
     BEGIN
         SET NOCOUNT ON;
+        DECLARE @JugadorID INT;
+        DECLARE @PartidaID INT;
 
-        -- Verifica que el Tipo sea válido
-        IF @Tipo NOT IN (1, 2)
-        BEGIN
-            THROW 50000, "El Tipo proporcionado no es válido.", 1;
-            RETURN;
-        END
-
-        -- Verifica que la Extensión sea válida (puedes extender la validación según sea necesario)
-        IF @Extension IS NULL
-        BEGIN
-            THROW 50000, 'La Extensión es obligatoria.', 1;
-            RETURN;
-        END
-
-        -- Verifica que la Temática sea válida (puedes extender la validación según sea necesario)
-        IF @Tematica IS NULL
-        BEGIN
-            THROW 50000, 'La Temática es obligatoria.', 1;
-            RETURN;
-        END
-
-        -- Inserta la nueva partida
+        -- Inserta la partida
         INSERT INTO Partidas (CodigoIdentificador, TipoJuego, Tematica, TiempoRestante, LargoObjetivo, Estado)
-        VALUES (@CodigoIdentificador, @Tipo, @Tematica, 
-                CASE WHEN @Tipo = 1 THEN @Extension ELSE NULL END, -- TiempoRestante
-                CASE WHEN @Tipo = 2 THEN @Extension ELSE NULL END, -- LargoObjetivo
+        VALUES (@CodigoIdentificador, @TipoJuego, @Tematica, 
+                CASE WHEN @TipoJuego = 1 THEN @Extension ELSE NULL END, -- TiempoRestante
+                CASE WHEN @TipoJuego = 2 THEN @Extension ELSE NULL END, -- LargoObjetivo
                 0); -- Inicializa el Estado con 0
-    END;
-	');
+
+		--INSERT INTO Partidas (TipoJuego, Tematica, CodigoIdentificador, Estado)
+        --VALUES (@TipoJuego, @Tematica, @CodigoIdentificacion, 0); -- Estado 0: En espera
+        --SET @PartidaID = SCOPE_IDENTITY()
+
+        -- Inserta el jugador en la partida
+        --INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente)
+        --VALUES (@PartidaID, @JugadorID, "ColorAleatorio", 1);
+
+        END;
+    ');
 END
 
--- Declarar variables de parámetros
-DECLARE @CodigoIdentificador NVARCHAR(10) = 'ABC123';
-DECLARE @Tipo INT = 1;
-DECLARE @Extension INT = 30;
-DECLARE @Tematica INT = 5;
-DECLARE @Cantidad INT = 2;
 
--- Ejecutar el procedimiento almacenado
+DECLARE @CodigoIdentificador NVARCHAR(10) = 'ABCY123';
+DECLARE @Tipo INT = 2;
+DECLARE @Extension INT = 50;
+DECLARE @Tematica INT = 1;
+
 EXEC sp_InsertarPartida
     @CodigoIdentificador = @CodigoIdentificador,
-    @Tipo = @Tipo,
+    @TipoJuego = @Tipo,
     @Extension = @Extension,
-    @Tematica = @Tematica,
-    @Cantidad = @Cantidad;
+    @Tematica = @Tematica;
 
-SELECT * FROM Partidas;
+select *from partidas

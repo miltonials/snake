@@ -4,6 +4,7 @@ using SnakeGameBackend.Controllers;
 using SnakeGame.Dao;
 using SnakeGameFrontend.Models;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SnakeGameFrontend.Controllers
 {
@@ -39,46 +40,79 @@ namespace SnakeGameFrontend.Controllers
         // POST: PartidaController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(int tipo, int extension,int tematica,int cantidad)
+        public async Task<IActionResult> Crear(int tipo, int extension, int tematica, int cantidad)
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
-            //validar que no este vacio
+
+            // Validar que no esté vacío
             if (tipo == 0 || extension == 0 || tematica == 0 || cantidad == 0)
             {
                 ViewBag.Error = "Debe llenar todos los campos";
                 return View();
             }
-            //validar que la extension sea mayor a 2
+
+            // Validar que la extensión sea mayor a 2
             if (extension < 2)
             {
-                ViewBag.Error = "La extension debe ser mayor a 2";
+                ViewBag.Error = "La extensión debe ser mayor a 2";
                 return View();
             }
-            // validar que la cantidad sea mayor a 2
+
+            // Validar que la cantidad sea mayor a 2
             if (cantidad < 2)
             {
                 ViewBag.Error = "La cantidad debe ser mayor a 2";
                 return View();
             }
-            // generar codigoIdentificador
+
+            // Generar códigoIdentificador
             string codigoIdentificador = Guid.NewGuid().ToString();
-            
+
             string apiUrl = _configuration.GetValue<string>("apiUrl");
             using (var httpClient = new HttpClient())
             {
-                // Utilizar Uri.EscapeDataString para codificar el parámetro en la URL
-                using var response = await httpClient.PostAsync($"{apiUrl}/InsertarPartida"´, );
+                // Crear la partidad para enviarla al servidor
+                Partida data = new()
+                {
+                    CodigoIdentificador = codigoIdentificador,
+                    Tipo = tipo,
+                    Largo = extension,
+                    Tiempo = extension,
+                    Tematica = tematica,
+                    Cantidad = cantidad,
+                    Estado = 0,
+                    Jugador = AuthController.GetPlayerSession(_contextAccessor),
+                    JugadorId = AuthController.GetPlayerSession(_contextAccessor).Id
+                };
+
+                // Serializar el objeto como JSON
+                var jsonData = JsonConvert.SerializeObject(data);
+
+                // Crear el contenido de la solicitud HTTP
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                // Realizar la solicitud HTTP POST
+                using var response = await httpClient.PostAsync($"{apiUrl}/InsertarPartida", content);
 
                 if (response.IsSuccessStatusCode)
                 {
+                    // Leer la respuesta del servidor
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    //partida = JsonConvert.DeserializeObject<Partida>(apiResponse);
+                    // Puedes deserializar la respuesta si es necesario
+                    // partida = JsonConvert.DeserializeObject<Partida>(apiResponse);
+                }
+                else
+                {
+                    // Manejar errores si la solicitud no es exitosa
+                    ViewBag.Error = $"Error al llamar a la API: {response.StatusCode}";
+                    return View();
                 }
             }
 
-            // redireccionar a la sala chat con el id de la sala
+            // Redireccionar a la sala de chat con el ID de la sala
             return RedirectToAction("Index", "Chat");
         }
+
 
         // GET: PartidaController/Edit/5
         public ActionResult Edit(int id)
