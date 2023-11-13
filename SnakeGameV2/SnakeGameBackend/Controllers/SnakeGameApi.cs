@@ -106,7 +106,7 @@ namespace SnakeGameBackend.Controllers
 
         
         [HttpPost("InsertarPartida")]
-        public Partida InsertarPartida(int tipo, int extension, int tematica,string codigoIdentificador, string nikName)
+        public int InsertarPartida(int tipo, int extension, int tematica,string codigoIdentificador, int jugadorId, int cantidad)
         {
             Partida partida = new();
             MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
@@ -115,16 +115,17 @@ namespace SnakeGameBackend.Controllers
             {
                 CommandType = CommandType.StoredProcedure
             };
-            command.Parameters.AddWithValue("@Tipo", tipo);
+            command.Parameters.AddWithValue("@TipoJuego", tipo);
             command.Parameters.AddWithValue("@Extension", extension);
             command.Parameters.AddWithValue("@Tematica", tematica);
             command.Parameters.AddWithValue("@CodigoIdentificador", codigoIdentificador);
-            command.Parameters.AddWithValue("@Nickname", nikName);
+            command.Parameters.AddWithValue("@JugadorID", jugadorId);
+            command.Parameters.AddWithValue("@Cantidad", cantidad);
             command.ExecuteNonQuery();
             connection.Close();
 
             //sacar id de la partida
-            return GetPartida(codigoIdentificador);
+            return CantidaPartidaEnProceso();
 
             //return GetPartida(codigoIdentificador);
 
@@ -142,16 +143,50 @@ namespace SnakeGameBackend.Controllers
             while (reader.Read())
             {
                 registro.Id = Convert.ToInt32(reader["PartidaId"]);
-                registro.Tipo = Convert.ToInt32(reader["Tipo"]);
-                registro.Largo = Convert.ToInt32(reader["TiempoRestante"]);
-                registro.Tiempo = Convert.ToInt32(reader["LargoObjetivo"]);
+                registro.Tipo = Convert.ToInt32(reader["TipoJuego"]);
+                try
+                {
+                    registro.Largo = Convert.ToInt32(reader["TiempoRestante"]);
+                }
+                catch (Exception e)
+                {
+                    registro.Largo = Convert.ToInt32(reader["LargoObjetivo"]);
+                }
                 registro.Tematica = Convert.ToInt32(reader["Tematica"]);
                 registro.CodigoIdentificador = reader["CodigoIdentificador"].ToString();
+                registro.Estado = Convert.ToInt32(reader["Estado"]);
+                // try para que no se caiga si no hay cantidad de jugadores
+                try
+                {
+                    registro.Cantidad = Convert.ToInt32(reader["CantidadJugadores"]);
+                }
+                catch (Exception e)
+                {
+                    registro.Cantidad = 0;
+                }
             }
 
             connection.Close();
             return registro;
         }
+
+        [HttpGet("CantidaPartidaEnProceso")]
+        public int CantidaPartidaEnProceso()
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("select count(*) as cantidad from Partidas where Estado = 0", connection);
+            SqlDataReader reader = command.ExecuteReader();
+            int cantidad = 0;
+            while (reader.Read())
+            {
+                cantidad = Convert.ToInt32(reader["cantidad"]);
+            }
+
+            connection.Close();
+            return cantidad;
+        }
+        
 
 
 

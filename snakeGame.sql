@@ -179,43 +179,78 @@ BEGIN
         @TipoJuego INT,
         @Extension INT,
         @Tematica INT,
-        @CodigoIdentificador NVARCHAR(10)
-       
+        @CodigoIdentificador NVARCHAR(10),
+        @JugadorID INT,
+		@Cantidad INT
     AS
     BEGIN
         SET NOCOUNT ON;
-        DECLARE @JugadorID INT;
         DECLARE @PartidaID INT;
 
-        -- Inserta la partida
-        INSERT INTO Partidas (CodigoIdentificador, TipoJuego, Tematica, TiempoRestante, LargoObjetivo, Estado)
-        VALUES (@CodigoIdentificador, @TipoJuego, @Tematica, 
-                CASE WHEN @TipoJuego = 1 THEN @Extension ELSE NULL END, -- TiempoRestante
-                CASE WHEN @TipoJuego = 2 THEN @Extension ELSE NULL END, -- LargoObjetivo
-                0); -- Inicializa el Estado con 0
+        -- Verifica si el CodigoIdentificador ya existe
+        IF NOT EXISTS (SELECT 1 FROM Partidas WHERE CodigoIdentificador = @CodigoIdentificador)
+        BEGIN
+            -- Inserta la partida
+            INSERT INTO Partidas (CodigoIdentificador, TipoJuego, Tematica, TiempoRestante, LargoObjetivo, Estado, CantidadJugadores)
+            VALUES (@CodigoIdentificador, @TipoJuego, @Tematica, 
+                    CASE WHEN @TipoJuego = 1 THEN @Extension ELSE NULL END, -- TiempoRestante
+                    CASE WHEN @TipoJuego = 2 THEN @Extension ELSE NULL END, -- LargoObjetivo
+                    0,@Cantidad); -- Inicializa el Estado con 0
 
-		--INSERT INTO Partidas (TipoJuego, Tematica, CodigoIdentificador, Estado)
-        --VALUES (@TipoJuego, @Tematica, @CodigoIdentificacion, 0); -- Estado 0: En espera
-        --SET @PartidaID = SCOPE_IDENTITY()
+            -- Obtiene el ID de la partida recién insertada
+            SET @PartidaID = SCOPE_IDENTITY();
 
-        -- Inserta el jugador en la partida
-        --INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente)
-        --VALUES (@PartidaID, @JugadorID, "ColorAleatorio", 1);
-
-        END;
+            -- Inserta el jugador en la partida
+            INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente)
+            VALUES (@PartidaID, @JugadorID, ''ND'', 1);
+        END
+        ELSE
+        BEGIN
+            PRINT ''El CodigoIdentificador ya existe. No se ha insertado la partida.'';
+        END
+    END;
     ');
 END
 
+-- Verifica si el procedimiento almacenado existe antes de eliminarlo
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_InsertarPartida')
+BEGIN
+    -- Elimina el procedimiento almacenado
+    DROP PROCEDURE sp_InsertarPartida;
+    PRINT 'El procedimiento almacenado ha sido eliminado.';
+END
+ELSE
+BEGIN
+    PRINT 'El procedimiento almacenado no existe.';
+END
 
-DECLARE @CodigoIdentificador NVARCHAR(10) = 'ABCY123';
+
+DECLARE @CodigoIdentificador NVARCHAR(10) = 'AHH563';
 DECLARE @Tipo INT = 2;
 DECLARE @Extension INT = 50;
 DECLARE @Tematica INT = 1;
+DECLARE @IDJugador INT = 24;
 
 EXEC sp_InsertarPartida
-    @CodigoIdentificador = @CodigoIdentificador,
     @TipoJuego = @Tipo,
     @Extension = @Extension,
-    @Tematica = @Tematica;
+    @Tematica = @Tematica,
+    @CodigoIdentificador = @CodigoIdentificador,
+	@JugadorID = @IDJugador,
+	@Cantidad = 2;
 
-select *from partidas
+select *from JugadoresXPartida
+select *from Partidas
+
+
+Delete from JugadoresXPartida
+where ColorSerpiente = 'ND';
+
+Delete from partidas
+where Estado = 0;
+
+
+select *from Jugadores Where Nickname = 'Andy' 
+
+
+select * from Partidas where CodigoIdentificador = 'ABCY123'

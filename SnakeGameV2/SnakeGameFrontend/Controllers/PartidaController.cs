@@ -42,7 +42,8 @@ namespace SnakeGameFrontend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(int tipo, int extension, int tematica, int cantidad)
         {
-            ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
+            Jugador jugador = AuthController.GetPlayerSession(_contextAccessor);
+            ViewBag.Jugador = jugador;
 
             // Validar que no esté vacío
             if (tipo == 0 || extension == 0 || tematica == 0 || cantidad == 0)
@@ -65,8 +66,12 @@ namespace SnakeGameFrontend.Controllers
                 return View();
             }
 
+            //validar que el usuario no este en sala, osea que no este asociado a una partida con estado 0
+           
+
             // Generar códigoIdentificador
             string codigoIdentificador = Guid.NewGuid().ToString();
+            int sala = 0;
 
             string apiUrl = _configuration.GetValue<string>("apiUrl");
             using (var httpClient = new HttpClient())
@@ -85,21 +90,19 @@ namespace SnakeGameFrontend.Controllers
                     JugadorId = AuthController.GetPlayerSession(_contextAccessor).Id
                 };
 
-                // Serializar el objeto como JSON
-                var jsonData = JsonConvert.SerializeObject(data);
-
-                // Crear el contenido de la solicitud HTTP
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
                 // Realizar la solicitud HTTP POST
-                using var response = await httpClient.PostAsync($"{apiUrl}/InsertarPartida", content);
-
+                //https://localhost:7043/SnakeGameApi/InsertarPartida?tipo=1&extension=1&tematica=1&codigoIdentificador=XYZ999&nikName=sa
+                string encodedCodigoIdentificador = Uri.EscapeDataString(codigoIdentificador);
+                int idJugador = jugador.Id;
+                using var response = await httpClient.PostAsync($"{apiUrl}/InsertarPartida?tipo={tipo}&extension={extension}&tematica={tematica}&codigoIdentificador={encodedCodigoIdentificador}&jugadorId={idJugador}&cantidad={cantidad}", null);
                 if (response.IsSuccessStatusCode)
                 {
                     // Leer la respuesta del servidor
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    // Puedes deserializar la respuesta si es necesario
-                    // partida = JsonConvert.DeserializeObject<Partida>(apiResponse);
+                    // Puedes deserializar la respuesta si es necesario a int 
+                    sala = JsonConvert.DeserializeObject<int>(apiResponse);
+                    //partida = JsonConvert.DeserializeObject<Partida>(apiResponse);
                 }
                 else
                 {
@@ -108,10 +111,16 @@ namespace SnakeGameFrontend.Controllers
                     return View();
                 }
             }
+            string salaString = sala.ToString();
 
             // Redireccionar a la sala de chat con el ID de la sala
-            return RedirectToAction("Index", "Chat");
+            // se usa el metodo Room de ChatController
+            ViewBag.Jugador = jugador;
+            // mostrar el jugador en la consola
+            Console.WriteLine("jugador: " + jugador.Nickname);
+            return RedirectToAction("Room", "Chat", new { room = salaString });
         }
+
 
 
         // GET: PartidaController/Edit/5

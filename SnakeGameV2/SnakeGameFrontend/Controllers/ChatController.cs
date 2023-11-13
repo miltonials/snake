@@ -35,6 +35,7 @@ namespace SnakeGameFrontend.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
             return View();
         }
 
