@@ -24,6 +24,10 @@ namespace SnakeGameFrontend.Controllers
         public async Task<IActionResult> Rooms()
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
+            if (ViewBag.Jugador == null)
+            {
+                return RedirectToAction("Index", "Auth");
+            }
             IEnumerable<PartidaEnEspera>? partidas = await GetPartidasAsync();
             return View(partidas);
         }
@@ -33,6 +37,7 @@ namespace SnakeGameFrontend.Controllers
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
             IEnumerable<PartidaEnEspera>? partidas = await GetPartidasAsync();
             PartidaEnEspera? partida = partidas.Where(p => p.CodigoIdentificador == room).FirstOrDefault();
+            partida.Jugadores = await getJugadoresAsync(partida.CodigoIdentificador);
 
             //obtener colores
             ViewBag.Colores = getColors(partida.CantidadJugadores * 2);
@@ -55,6 +60,24 @@ namespace SnakeGameFrontend.Controllers
                 }
             }
             return partidas;
+        }
+
+        private async Task<IEnumerable<SnakeGameBackend.Models.Jugador>?> getJugadoresAsync(string codigoIdentificador)
+        {
+            IEnumerable<SnakeGameBackend.Models.Jugador>? jugadores = null;
+            string apiUrl = _configuration.GetValue<string>("apiUrl");
+
+            using (var httpClient = new HttpClient())
+            {
+                using var response = await httpClient.GetAsync($"{apiUrl}/JugadoresEnPartida?identificadorPartida={codigoIdentificador}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    jugadores = JsonConvert.DeserializeObject<IEnumerable<SnakeGameBackend.Models.Jugador>>(apiResponse);
+                }
+            }
+            return jugadores;
         }
 
         private string[] getColors(int? cantidad)

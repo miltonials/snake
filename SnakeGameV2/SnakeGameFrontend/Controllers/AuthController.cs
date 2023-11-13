@@ -46,7 +46,7 @@ namespace SnakeGameFrontend.Controllers
                 return RedirectToAction("Index");
             }
 
-            Jugador? jugador = await FindAsync(pNickname);
+            SnakeGameBackend.Models.Jugador? jugador = await FindAsync(pNickname);
 
             // Guardar la información del usuario en una cookie
             List<Claim> c = new()
@@ -82,9 +82,9 @@ namespace SnakeGameFrontend.Controllers
         }
 
 
-        public async Task<Jugador?> FindAsync(string pNickname)
+        public async Task<SnakeGameBackend.Models.Jugador?> FindAsync(string pNickname)
         {
-            Jugador? jugador = null;
+            SnakeGameBackend.Models.Jugador? jugador = null;
             string apiUrl = _configuration.GetValue<string>("apiUrl");
 
             using (var httpClient = new HttpClient())
@@ -96,7 +96,7 @@ namespace SnakeGameFrontend.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    jugador = JsonConvert.DeserializeObject<Jugador>(apiResponse);
+                    jugador = JsonConvert.DeserializeObject<SnakeGameBackend.Models.Jugador>(apiResponse);
                 }
             }
 
@@ -106,14 +106,14 @@ namespace SnakeGameFrontend.Controllers
 
 
 
-        public static Jugador? GetPlayerSession(IHttpContextAccessor httpContextAccessor)
+        public static SnakeGameBackend.Models.Jugador? GetPlayerSession(IHttpContextAccessor httpContextAccessor)
         {
             HttpContext? httpContext = httpContextAccessor.HttpContext;
-            Jugador? jugador = null;
+            SnakeGameBackend.Models.Jugador? jugador = null;
 
             if (httpContext.Request.Cookies.TryGetValue("JugadorCookie", out string usuarioJson))
             {
-                jugador = JsonConvert.DeserializeObject<Jugador>(usuarioJson);
+                jugador = JsonConvert.DeserializeObject<SnakeGameBackend.Models.Jugador>(usuarioJson);
             }
 
             return jugador;

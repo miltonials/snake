@@ -1,6 +1,4 @@
-﻿using SnakeGameFrontend.Models;
-
-namespace SnakeGameBackend.Models
+﻿namespace SnakeGameBackend.Models
 {
     public class PartidaEnEspera: Partida
     {

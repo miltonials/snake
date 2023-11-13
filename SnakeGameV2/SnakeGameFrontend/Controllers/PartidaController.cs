@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SnakeGameBackend.Controllers;
-using SnakeGame.Dao;
-using SnakeGameFrontend.Models;
-using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
+using SnakeGameBackend.Models;
 using Newtonsoft.Json;
 
 namespace SnakeGameFrontend.Controllers

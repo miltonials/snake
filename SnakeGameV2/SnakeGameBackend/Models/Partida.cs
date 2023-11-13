@@ -1,4 +1,4 @@
-﻿using SnakeGameFrontend.Models;
+﻿//using SnakeGameFrontend.Models;
 
 namespace SnakeGameBackend.Models
 {
@@ -15,6 +15,6 @@ namespace SnakeGameBackend.Models
         public int? Estado { get; set; }
         public Jugador? Jugador { get; set; }
         //datos de partida en espera
-
+        public IEnumerable<Jugador>? Jugadores { get; set; }
     }
 }

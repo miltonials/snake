@@ -21,6 +21,10 @@ namespace SnakeGameFrontend.Controllers
         public IActionResult Index()
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
+            if(ViewBag.Jugador == null)
+            {
+                return RedirectToAction("Index", "Auth");
+            }
             return View();
         }
 

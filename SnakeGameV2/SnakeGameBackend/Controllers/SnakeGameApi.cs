@@ -206,7 +206,8 @@ namespace SnakeGameBackend.Controllers
                     Tematica = reader["Tematica"].ToString(),
                     CodigoIdentificador = reader["CodigoIdentificador"].ToString(),
                     CantidadJugadores = Convert.ToInt32(reader["CantidadJugadores"]),
-                    JugadoresConectados = Convert.ToInt32(reader["JugadoresConectados"])
+                    JugadoresConectados = Convert.ToInt32(reader["JugadoresConectados"]),
+
                 };
                 partidas.Add(registro);
             }
@@ -245,5 +246,32 @@ namespace SnakeGameBackend.Controllers
             command.ExecuteNonQuery();
             connection.Close();
         }
+
+        [HttpGet("JugadoresEnPartida")]
+        public IEnumerable<Jugador> JugadoresEnPartida(string identificadorPartida)
+        {
+            List<Jugador> jugadoresEnPartida = new ();
+
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("sp_ObtenerJugadoresEnPartida", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            command.Parameters.AddWithValue("@IdentificadorPartida", identificadorPartida);
+
+            using SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                Jugador jugador = new()
+                {
+                    Nickname = reader["Nickname"].ToString(),
+                };
+                jugadoresEnPartida.Add(jugador);
+            }
+
+            return jugadoresEnPartida;
+        }
+
     }
 }

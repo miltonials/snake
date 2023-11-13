@@ -224,13 +224,40 @@ BEGIN
         -- Insertar al jugador en la partida
         INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente)
         VALUES (@PartidaID, @JugadorID, @ColorSerpiente, 1);
-
-        -- Notificar la entrada del jugador
-        INSERT INTO ChatMensajes (PartidaID, JugadorID, Mensaje, Fecha)
-        VALUES (@PartidaID, @JugadorID, 'El jugador ' + @Nickname + ' ha entrado a la partida.', GETDATE());
     END
 END;
+go
 
+CREATE PROCEDURE sp_AbandonarPartida
+    @IdentificadorPartida NVARCHAR(10),
+    @Nickname NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @JugadorID INT;
+    DECLARE @PartidaID INT;
+
+    -- Obtener el ID del jugador
+    SELECT @JugadorID = JugadorID
+    FROM Jugadores
+    WHERE LOWER(Nickname) = LOWER(@Nickname);
+
+    -- Obtener el ID de la partida
+    SELECT @PartidaID = PartidaID
+    FROM Partidas
+    WHERE CodigoIdentificador = @IdentificadorPartida;
+
+    -- Eliminar al jugador de la partida
+    DELETE FROM JugadoresXPartida
+    WHERE JugadorID = @JugadorID AND PartidaID = @PartidaID;
+END;
+
+SELECT * FROM Partidas WHERE CodigoIdentificador = '3342ad53-b';
+select * from JugadoresXPartida JXP
+INNER JOIN Partidas P ON P.PartidaID = JXP.PartidaID
+INNER JOIN Jugadores J ON J.JugadorID = JXP.JugadorID
+WHERE P.CodigoIdentificador = 'd7b5ce9b-7'
 
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_InsertarPartida')

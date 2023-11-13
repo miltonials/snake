@@ -1,4 +1,4 @@
-namespace SnakeGameFrontend.Models
+namespace SnakeGameBackend.Models
 {
     public class Jugador
     {
