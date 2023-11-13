@@ -121,9 +121,33 @@ BEGIN
     ');
 END
 
-
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'V' AND name = 'PartidasEnEspera')
+BEGIN
+    EXEC('
+	CREATE VIEW PartidasEnEspera AS
+	SELECT
+		P.PartidaId,
+		P.CodigoIdentificador,
+		CASE
+			WHEN P.TipoJuego = 1 THEN ''Tiempo''
+			WHEN P.TipoJuego = 2 THEN ''Largo''
+			ELSE ''Desconocido''
+		END AS [TipoJuego],
+		CASE
+			WHEN P.Tematica = 1 THEN ''Estandar''
+			WHEN P.Tematica = 2 THEN ''Fruit mix''
+		END AS Tematica,
+		P.CantidadJugadores,
+		COUNT(JXP.JugadorID) JugadoresConectados
+	FROM Partidas P
+	INNER JOIN JugadoresXPartida JXP ON JXP.PartidaId = P.PartidaID
+	WHERE P.Estado = 0
+	GROUP BY P.PartidaId,P.CodigoIdentificador,TipoJuego,Tematica,CantidadJugadores;
+	');
+END
 
 ALTER TABLE Jugadores ADD CONSTRAINT u_nickname UNIQUE (Nickname);
+ALTER TABLE Partidas ADD CONSTRAINT u_codId UNIQUE (CodigoIdentificador);
 
 
 select * from Jugadores;

@@ -186,9 +186,32 @@ namespace SnakeGameBackend.Controllers
             connection.Close();
             return cantidad;
         }
-        
 
+        [HttpGet("PartidasEnProceso")]
+        public IEnumerable<PartidaEnEspera> PartidasEnProceso()
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("select * from PartidasEnEspera", connection);
+            SqlDataReader reader = command.ExecuteReader();
+            List<PartidaEnEspera> partidas = new();
+            while (reader.Read())
+            {
+                PartidaEnEspera registro = new()
+                {
+                    Id = Convert.ToInt32(reader["PartidaId"]),
+                    TipoJuego = reader["TipoJuego"].ToString(),
+                    //Largo = Convert.ToInt32(reader["TiempoRestante"]),
+                    Tematica = reader["Tematica"].ToString(),
+                    CodigoIdentificador = reader["CodigoIdentificador"].ToString(),
+                    CantidadJugadores = Convert.ToInt32(reader["CantidadJugadores"]),
+                    JugadoresConectados = Convert.ToInt32(reader["JugadoresConectados"])
+                };
+                partidas.Add(registro);
+            }
 
-
+            connection.Close();
+            return partidas;
+        }
     }
 }

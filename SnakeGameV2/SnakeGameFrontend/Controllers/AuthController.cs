@@ -24,6 +24,13 @@ namespace SnakeGameFrontend.Controllers
             if (c.Identity != null && c.Identity.IsAuthenticated)
             {
                 ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
+
+                if (ViewBag.Jugador == null)
+                {
+                    _contextAccessor.HttpContext.User = null;
+                    return View();
+                }
+                
                 return RedirectToAction("Index", "Home");
             }
             return View();

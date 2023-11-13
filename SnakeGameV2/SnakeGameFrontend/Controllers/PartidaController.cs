@@ -118,7 +118,8 @@ namespace SnakeGameFrontend.Controllers
             ViewBag.Jugador = jugador;
             // mostrar el jugador en la consola
             Console.WriteLine("jugador: " + jugador.Nickname);
-            return RedirectToAction("Room", "Chat", new { room = salaString });
+            codigoIdentificador = codigoIdentificador.Substring(0, 10);
+            return RedirectToAction("Room", "Chat", new { room = codigoIdentificador });
         }
 
 

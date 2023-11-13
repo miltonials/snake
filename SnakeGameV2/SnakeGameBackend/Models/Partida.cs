@@ -14,5 +14,7 @@ namespace SnakeGameBackend.Models
         public int? JugadorId { get; set; }
         public int? Estado { get; set; }
         public Jugador? Jugador { get; set; }
+        //datos de partida en espera
+
     }
 }

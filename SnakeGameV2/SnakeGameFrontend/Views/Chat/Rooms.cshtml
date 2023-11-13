@@ -1,0 +1,48 @@
+﻿@using SnakeGameBackend.Models;
+@model IEnumerable<PartidaEnEspera>
+
+<h1>Chat</h1>
+
+
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <h2>Salas disponibles</h2>
+        <ul class="list-group">
+            @foreach (var e in Model)
+            {
+                @*entificador de juego, temática, tipo+variable, cantidad de usuarios y los usuarios unidos (deberá irse actualizando*@
+                @*<li class="list-group-item">
+                    <a href="~/Chat/Room?room=@e.CodigoIdentificador">@e.CodigoIdentificador</a>
+                    entificador de juego, temática, tipo+variable, cantidad de usuarios y los usuarios unidos (deberá irse actualizando
+                </li>*@
+            }
+        </ul>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Identificador</th>
+                    <th scope="col">Tematica</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Cantidad de usuarios</th>
+                    <th scope="col">Usuarios unidos</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (PartidaEnEspera partida in Model)
+                {
+                    <tr>
+                        <td>@partida.CodigoIdentificador</td>
+                        <td>@partida.Tematica</td>
+                        <td>@partida.TipoJuego</td>
+                        <td>@partida.CantidadJugadores</td>
+                        <td>@partida.JugadoresConectados</td>
+                        <td>
+                            <a class="btn btn-outline-info" href="~/Chat/Room?room=@partida.CodigoIdentificador">Unirme</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

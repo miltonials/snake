@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using SnakeGameBackend.Models;
+//using SnakeGameBackend.Models.Partida;
 using SnakeGameFrontend.Models;
 using System.Diagnostics;
 
@@ -13,36 +14,42 @@ namespace SnakeGameFrontend.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _contextAccessor;
-        public static Dictionary<int, string> Rooms =
-            new()
-            {
-                {1, "sala1" },
-                {2, "sala2" },
-                {3, "sala3" },
-                {4, "sala4" },
-                {5, "sala5" },
-                {6, "sala6" },
-                {7, "sala7" },
-                {8, "sala8" },
-                {9, "sala9" },
-                {10, "sala10" }
-            };
+
         public ChatController(IConfiguration configuration, IHttpContextAccessor contextAccessor)
         {
             _configuration = configuration;
             _contextAccessor = contextAccessor;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Rooms()
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
-            return View();
+            IEnumerable<PartidaEnEspera>? partidas = await GetPartidasAsync();
+            return View(partidas);
         }
 
-        public IActionResult Room(int room)
+        public IActionResult Room(string room)
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
             return View("Room", room);
+        }
+
+        private async Task<IEnumerable<PartidaEnEspera>?> GetPartidasAsync()
+        {
+            IEnumerable<PartidaEnEspera>? partidas = null;
+            string apiUrl = _configuration.GetValue<string>("apiUrl");
+
+            using (var httpClient = new HttpClient())
+            {
+                using var response = await httpClient.GetAsync($"{apiUrl}/PartidasEnProceso");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    partidas = JsonConvert.DeserializeObject<IEnumerable<PartidaEnEspera>>(apiResponse);
+                }
+            }
+            return partidas;
         }
     }
 }
