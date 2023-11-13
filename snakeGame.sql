@@ -195,6 +195,43 @@ INSERT INTO Ganadores (PartidaID, JugadorXPartidaID) VALUES
 (8, 2),
 (9, 4),
 (10, 10);
+GO
+
+CREATE PROCEDURE sp_UnirsePartida
+    @IdentificadorPartida NVARCHAR(10),
+    @Nickname NVARCHAR(50),
+    @ColorSerpiente NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @JugadorID INT;
+    DECLARE @PartidaID INT;
+
+    -- Obtener el ID del jugador
+    SELECT @JugadorID = JugadorID
+    FROM Jugadores
+    WHERE LOWER(Nickname) = LOWER(@Nickname);
+
+    -- Obtener el ID de la partida
+    SELECT @PartidaID = PartidaID
+    FROM Partidas
+    WHERE CodigoIdentificador = @IdentificadorPartida;
+
+    -- Verificar si el jugador ya está en la partida
+    IF NOT EXISTS (SELECT 1 FROM JugadoresXPartida WHERE JugadorID = @JugadorID AND PartidaID = @PartidaID)
+    BEGIN
+        -- Insertar al jugador en la partida
+        INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente, LargoSerpiente)
+        VALUES (@PartidaID, @JugadorID, @ColorSerpiente, 1);
+
+        -- Notificar la entrada del jugador
+        INSERT INTO ChatMensajes (PartidaID, JugadorID, Mensaje, Fecha)
+        VALUES (@PartidaID, @JugadorID, 'El jugador ' + @Nickname + ' ha entrado a la partida.', GETDATE());
+    END
+END;
+
+
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_InsertarPartida')
 BEGIN

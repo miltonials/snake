@@ -2,19 +2,25 @@
 
 @{
     ViewBag.Title = "Room";
-    //ViewBag.Jugador
     Jugador jugador = ViewBag.Jugador;
 }
-@* muestro el nombre del jugador *@
+
 <h1>NickName de jugador @jugador.Nickname</h1>
 
-@*<h1>@SnakeGameFrontend.Controllers.ChatController.Rooms.GetValueOrDefault(Model)</h1>*@
 
 <div class="row">
 
     <div class="col-md-8 offset-2">
 
         <h2>Chat</h2>
+        <div class="card">
+            @foreach(var color in ViewBag.Colores)
+            {
+                <div class="card-header" style="background-color: @color; color: white">
+                    @color
+                </div>
+            }
+        </div>
 
         <div class="row">
             <div class="col-md-12">
@@ -37,6 +43,9 @@
     </div>
 </div>
 
+<button id="btnCerrar" class="btn btn-danger">Cerrar</button>
+
+
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 @*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/latest/signalr.min.js"></script>*@
 
@@ -45,7 +54,7 @@
 
     connection.start().then(() => {
         console.log("connected");
-        connection.invoke("JoinRoom", "@Model")
+        connection.invoke("JoinRoom", "@Model", "@jugador.Nickname")
             .catch(function (err) {
                 return console.error(err.toString());
             });
@@ -73,4 +82,18 @@
         msg.innerHTML = `<strong>${user}</strong>: ${message}`;
         document.getElementById("messages").appendChild(msg);
     });
+
+    connection.on("RedirectTo", function (location) {
+        window.location.href = location;
+    });
+
+    // Manejador de eventos cuando el usuario cierra la página o abandona la sala
+    window.addEventListener('beforeunload', function () {
+        // Llama a la función LeaveRoom para notificar que el jugador se está yendo
+        connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    });
+
 </script>

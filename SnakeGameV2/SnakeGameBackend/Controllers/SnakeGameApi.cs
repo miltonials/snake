@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using SnakeGameBackend.Models;
 using SnakeGameFrontend.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace SnakeGameBackend.Controllers
 {
@@ -212,6 +213,37 @@ namespace SnakeGameBackend.Controllers
 
             connection.Close();
             return partidas;
+        }
+
+        [HttpPost("UnirsePartida")]
+        public void UnirsePartida(string identificadorPartida, string nickname, string colorSerpiente)
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("sp_UnirsePartida", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            command.Parameters.AddWithValue("@IdentificadorPartida", identificadorPartida);
+            command.Parameters.AddWithValue("@Nickname", nickname);
+            command.Parameters.AddWithValue("@ColorSerpiente", colorSerpiente);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        [HttpPost("AbandonarPartida")]
+        public void AbandonarPartida(string identificadorPartida, string nickname)
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("sp_AbandonarPartida", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            command.Parameters.AddWithValue("@IdentificadorPartida", identificadorPartida);
+            command.Parameters.AddWithValue("@Nickname", nickname);
+            command.ExecuteNonQuery();
+            connection.Close();
         }
     }
 }
