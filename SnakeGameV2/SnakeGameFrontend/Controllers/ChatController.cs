@@ -39,6 +39,13 @@ namespace SnakeGameFrontend.Controllers
             PartidaEnEspera? partida = partidas.Where(p => p.CodigoIdentificador == room).FirstOrDefault();
             partida.Jugadores = await getJugadoresAsync(partida.CodigoIdentificador);
 
+            ViewBag.Partida = partida;
+
+            if (partida.JugadoresConectados >= partida.CantidadJugadores)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             //obtener colores
             ViewBag.Colores = getColors(partida.CantidadJugadores * 2);
             return View("Room", room);

@@ -1,12 +1,12 @@
 ﻿@using SnakeGameBackend.Models;
 @model IEnumerable<PartidaEnEspera>
 
-<h1>Chat</h1>
+<h1></h1>
 
 
 <div class="row">
     <div class="col-md-8 offset-2">
-        <h2>Salas disponibles</h2>
+        <h2>Salas en espera</h2>
         <ul class="list-group">
             @foreach (var e in Model)
             {
@@ -23,8 +23,8 @@
                     <th scope="col">Identificador</th>
                     <th scope="col">Tematica</th>
                     <th scope="col">Tipo</th>
-                    <th scope="col">Cantidad de usuarios</th>
-                    <th scope="col">Usuarios unidos</th>
+                    <th scope="col">Cupo</th>
+                    <th scope="col">Jugadores conectados</th>
                     <th scope="col"></th>
                 </tr>
             </thead>

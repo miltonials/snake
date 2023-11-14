@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Room";
     SnakeGameBackend.Models.Jugador jugador = ViewBag.Jugador;
+    SnakeGameBackend.Models.PartidaEnEspera partida = ViewBag.Partida;
 }
 
 <h1>NickName de jugador @jugador.Nickname</h1>
@@ -43,7 +44,7 @@
     </div>
 </div>
 
-<button id="btnCerrar" class="btn btn-danger">Cerrar</button>
+<button id="btnIniciarPartida" class="btn btn-outline-success">Cerrar</button>
 
 
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
@@ -51,6 +52,7 @@
 
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
 
     connection.start().then(() => {
         console.log("connected");
@@ -60,6 +62,22 @@
             });
     }).catch(function (err) {
         return console.error(err.toString());
+    });
+
+    let cantidadJugadores = @partida.CantidadJugadores;
+    let jugadoresConectados = @partida.JugadoresConectados;
+    connection.on("JugadoresCompletos", function () {
+        console.log("Cantidad de jugadores: " + @partida.CantidadJugadores);
+        console.log("Jugadores conectados: " + @partida.JugadoresConectados + 1);
+            if (cantidadJugadores == jugadoresConectados + 1) {
+            //colocar el boton de iniciar partida
+            document.getElementById("btnIniciarPartida").style.display = "block";
+            jugadoresConectados += 1;
+        }
+        else {
+            document.getElementById("btnIniciarPartida").style.display = "none";
+            jugadoresConectados -= 1;
+        }
     });
 
     document.getElementById("btnSend").addEventListener("click", function (event) {

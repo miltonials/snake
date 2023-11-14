@@ -14,12 +14,14 @@ namespace SnakeGameFrontend.Models
         {
             await AddPlayer(room, nickName);
             await Groups.AddToGroupAsync(Context.ConnectionId, room);
+            await Clients.Group(room).SendAsync("JugadoresCompletos");
             await Clients.Group(room).SendAsync("ReceiveMessage", "Server", $"{Context.ConnectionId} has joined the room {room}.");
         }
 
         public async Task LeaveRoom(string room, string user)
         {
             await RemovePlayer(room, user);
+            await Clients.Group(room).SendAsync("JugadoresCompletos");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, room);
             await Clients.Group(room).SendAsync("ReceiveMessage", "Server", $"{user} has left the room {room}.");
         }

@@ -121,6 +121,28 @@ BEGIN
     ');
 END
 
+CREATE VIEW PartidasEnEspera AS
+	SELECT
+		P.PartidaId,
+		P.CodigoIdentificador,
+		CASE
+			WHEN P.TipoJuego = 1 THEN 'Tiempo'
+			WHEN P.TipoJuego = 2 THEN 'Largo'
+			ELSE 'Desconocido'
+		END AS [TipoJuego],
+		CASE
+			WHEN P.Tematica = 1 THEN 'Estandar'
+			WHEN P.Tematica = 2 THEN 'Fruit mix'
+		END AS Tematica,
+		P.CantidadJugadores,
+		COUNT(JXP.JugadorID) JugadoresConectados
+	FROM Partidas P
+	INNER JOIN JugadoresXPartida JXP ON JXP.PartidaId = P.PartidaID
+	WHERE 
+		P.Estado = 0
+	GROUP BY P.PartidaId,P.CodigoIdentificador,TipoJuego,Tematica,CantidadJugadores
+	HAVING COUNT(JXP.JugadorID) <= P.CantidadJugadores;
+
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = 'V' AND name = 'PartidasEnEspera')
 BEGIN
     EXEC('
@@ -141,7 +163,9 @@ BEGIN
 		COUNT(JXP.JugadorID) JugadoresConectados
 	FROM Partidas P
 	INNER JOIN JugadoresXPartida JXP ON JXP.PartidaId = P.PartidaID
-	WHERE P.Estado = 0
+	WHERE 
+		P.Estado = 0 AND
+		P.CantidadJugadores <= JugadoresConectados
 	GROUP BY P.PartidaId,P.CodigoIdentificador,TipoJuego,Tematica,CantidadJugadores;
 	');
 END
@@ -253,6 +277,20 @@ BEGIN
     WHERE JugadorID = @JugadorID AND PartidaID = @PartidaID;
 END;
 
+
+CREATE PROCEDURE sp_ObtenerJugadoresEnPartida
+    @IdentificadorPartida NVARCHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT J.JugadorID, J.Nickname, JXP.ColorSerpiente, JXP.LargoSerpiente
+    FROM JugadoresXPartida JXP
+    INNER JOIN Jugadores J ON JXP.JugadorID = J.JugadorID
+    INNER JOIN Partidas P ON JXP.PartidaID = P.PartidaID
+    WHERE P.CodigoIdentificador = @IdentificadorPartida;
+END;
+select * from PartidasEnEspera;
 SELECT * FROM Partidas WHERE CodigoIdentificador = '3342ad53-b';
 select * from JugadoresXPartida JXP
 INNER JOIN Partidas P ON P.PartidaID = JXP.PartidaID
