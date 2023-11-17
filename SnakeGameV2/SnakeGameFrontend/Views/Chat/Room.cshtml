@@ -6,38 +6,36 @@
     SnakeGameBackend.Models.PartidaEnEspera partida = ViewBag.Partida;
 }
 
-<h1>NickName de jugador @jugador.Nickname</h1>
+@* <h1>NickName de jugador @jugador.Nickname</h1> *@
 
 
-<div class="row">
-
-    <div class="col-md-8 offset-2">
-
-        <h2>Chat</h2>
-        <div class="card">
-            @foreach(var color in ViewBag.Colores)
+<div class="h-100">
+    <h2>Chat</h2>
+    @* Color a escoger *@
+    <label for="colorSelector">Color:</label>
+    <div class="card">
+        <select id="colorSelector" class="form-control">
+            @foreach (var color in ViewBag.Colores)
             {
-                <div class="card-header" style="background-color: @color; color: white">
-                    @color
-                </div>
+                <option value="@color" style="background-color: @color; color: white;">@color</option>
             }
-        </div>
+        </select>
+    </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div id="chat" class="chat">
-                    <div id="messages" class="messages">
-                    </div>
-                </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="chat" class="chat">
+                <div id="messages" class="messages"></div>
             </div>
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <input id="message" type="text" class="form-control" />
-            </div>
+    <div class="row">
+        <div class="col-md-12">
+            <input id="message" type="text" class="form-control" />
         </div>
-        <div class="row">
+    </div>
+    <div class="row">
         <div class="col-md-12">
             <button id="btnSend" class="btn btn-primary">Enviar</button>
         </div>
@@ -112,6 +110,43 @@
             .catch(function (err) {
                 return console.error(err.toString());
             });
+    });
+
+    document.getElementById("colorSelector").addEventListener("change", function () {
+        highlightSelectedOption();
+    });
+
+    function highlightSelectedOption() {
+        // Obtener el elemento seleccionado
+        var selectedOption = document.getElementById("colorSelector");
+        var selectedColor = selectedOption.options[selectedOption.selectedIndex].value;
+
+        // Aplicar el estilo a la opción seleccionada
+        selectedOption.style.backgroundColor = selectedColor;
+        selectedOption.style.color = "white";
+    }
+
+    document.getElementById("btnSend").addEventListener("click", function (event) {
+        let room = "@Model";
+        let user = "@jugador.Nickname"
+        let message = document.getElementById("message").value;
+        // Obtener el color seleccionado del combobox
+        let selectedColor = document.getElementById("colorSelector").value;
+
+        connection.invoke("SendMessage", room, user, message, selectedColor)
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+
+        document.getElementById("message").value = "";
+
+        event.preventDefault();
+    });
+
+    connection.on("ReceiveMessage", function (user, message, color) {
+        let msg = document.createElement("div");
+        msg.innerHTML = `<strong style="color: ${color}">${user}</strong>: ${message}`;
+        document.getElementById("messages").appendChild(msg);
     });
 
 </script>
