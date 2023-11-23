@@ -1,56 +1,62 @@
 ﻿@model string
-
 @{
     ViewBag.Title = "Room";
     SnakeGameBackend.Models.Jugador jugador = ViewBag.Jugador;
     SnakeGameBackend.Models.PartidaEnEspera partida = ViewBag.Partida;
 }
 
-@* <h1>NickName de jugador @jugador.Nickname</h1> *@
+<div class="h-100" data-current-color="@jugador.ColorSerpiente">
+    <div class="h-100">
+        <h2>@jugador.Nickname estás en la sala de espera @partida.CodigoIdentificador</h2>
+        <label id="colorSelectorLabel" for="colorSelector" style="font-weight: bolder">Cuando la sala esté llena se podrá seleccionar color.</label>
+        <div id="colorSelectorDiv" class="card" style="display: none">
+            <select id="colorSelector" class="form-control" value=""></select>
+        </div>
 
-
-<div class="h-100">
-    <h2>Chat</h2>
-    @* Color a escoger *@
-    <label for="colorSelector">Color:</label>
-    <div class="card">
-        <select id="colorSelector" class="form-control">
-            @foreach (var color in ViewBag.Colores)
-            {
-                <option value="@color" style="background-color: @color; color: white;">@color</option>
-            }
-        </select>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div id="chat" class="chat">
-                <div id="messages" class="messages"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="chat" class="chat">
+                    <div id="messages" class="messages"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <input id="message" type="text" class="form-control" />
+        <div class="row">
+            <div class="col-md-12">
+                <input id="message" type="text" class="form-control" />
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <button id="btnSend" class="btn btn-primary">Enviar</button>
+        <div class="row">
+            <div class="col-md-12">
+                <button id="btnSend" class="btn btn-primary">Enviar</button>
+            </div>
         </div>
     </div>
 </div>
 
-<button id="btnIniciarPartida" class="btn btn-outline-success">Cerrar</button>
-
+<button id="btnIniciarPartida" class="btn btn-outline-success">Iniciar partida</button>
 
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-@*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/latest/signalr.min.js"></script>*@
-
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+    let selectedColor;
+    let partida = {
+        cantidadJugadores: @partida.CantidadJugadores,
+        jugadoresConectados: @partida.JugadoresConectados,
+        roomId: "@partida.CodigoIdentificador"
+    };
 
+    let jugador = {
+        Nickname: "@jugador.Nickname",
+        ColorSerpiente: "@jugador.ColorSerpiente"
+    };
+
+    let colores = [
+    @foreach (var color in ViewBag.Colores)
+    {
+        @: "@color",
+    }
+    ];
 
     connection.start().then(() => {
         console.log("connected");
@@ -72,25 +78,50 @@
             document.getElementById("btnIniciarPartida").style.display = "block";
             jugadoresConectados += 1;
         }
-        else {
+    });
+
+    connection.on("ColorOccupied", function (occupiedColor) {
+        // Notificar al usuario que el color está ocupado
+        alert(`¡El color ${occupiedColor} ya está ocupado! Selecciona otro color.`);
+        // Restaurar la opción previamente seleccionada en el combobox
+        restoreSelectedOption();
+    });
+
+    connection.on("JugadoresCompletos", function () {
+        if (partida.cantidadJugadores == partida.jugadoresConectados + 1) {
+            connection.invoke("ShowColors")
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        } else {
             document.getElementById("btnIniciarPartida").style.display = "none";
-            jugadoresConectados -= 1;
+            partida.jugadoresConectados -= 1;
         }
     });
 
     document.getElementById("btnSend").addEventListener("click", function (event) {
-        let room = "@Model";
-        let user = "@jugador.Nickname"
         let message = document.getElementById("message").value;
-
-        connection.invoke("SendMessage", room, user, message)
+        connection.invoke("SendMessage", partida.roomId, jugador.Nickname, message)
             .catch(function (err) {
                 return console.error(err.toString());
             });
 
         document.getElementById("message").value = "";
-
         event.preventDefault();
+    });
+
+    connection.on("ShowColors", function () {
+        document.getElementById("colorSelectorLabel").innerHTML = "Selecciona tu color";
+        document.getElementById("colorSelectorDiv").style.display = "block";
+        let colorSelector = document.getElementById("colorSelector");
+        colores.forEach(color => {
+            let option = document.createElement("option");
+            option.id = `colorOption_${color}`;
+            option.value = color;
+            option.text = color;
+            option.style = `background-color: ${color};`;
+            colorSelector.add(option);
+        });
     });
 
     connection.on("ReceiveMessage", function (user, message) {
@@ -103,9 +134,7 @@
         window.location.href = location;
     });
 
-    // Manejador de eventos cuando el usuario cierra la página o abandona la sala
     window.addEventListener('beforeunload', function () {
-        // Llama a la función LeaveRoom para notificar que el jugador se está yendo
         connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
             .catch(function (err) {
                 return console.error(err.toString());
@@ -117,36 +146,57 @@
     });
 
     function highlightSelectedOption() {
-        // Obtener el elemento seleccionado
         var selectedOption = document.getElementById("colorSelector");
         var selectedColor = selectedOption.options[selectedOption.selectedIndex].value;
 
-        // Aplicar el estilo a la opción seleccionada
         selectedOption.style.backgroundColor = selectedColor;
         selectedOption.style.color = "white";
     }
 
-    document.getElementById("btnSend").addEventListener("click", function (event) {
-        let room = "@Model";
-        let user = "@jugador.Nickname"
-        let message = document.getElementById("message").value;
-        // Obtener el color seleccionado del combobox
-        let selectedColor = document.getElementById("colorSelector").value;
-
-        connection.invoke("SendMessage", room, user, message, selectedColor)
-            .catch(function (err) {
-                return console.error(err.toString());
-            });
-
-        document.getElementById("message").value = "";
-
-        event.preventDefault();
-    });
-
-    connection.on("ReceiveMessage", function (user, message, color) {
+    connection.on("ColorSelected", function (user, newlySelectedColor, isCurrentUser) {
         let msg = document.createElement("div");
-        msg.innerHTML = `<strong style="color: ${color}">${user}</strong>: ${message}`;
+        msg.innerHTML = `<strong style="color: ${newlySelectedColor}">${user}</strong> ha seleccionado el color ${newlySelectedColor}.`;
         document.getElementById("messages").appendChild(msg);
+
+        if (isCurrentUser) {
+            hideColorOption(newlySelectedColor);
+            showColorOption(selectedColor);
+            selectedColor = newlySelectedColor;
+        }
+        console.log(jugador);
     });
+
+    connection.on("AllPlayersReady", function (totalPlayers) {
+        // Todos los jugadores están listos, mostrar el botón de iniciar partida
+        document.getElementById("btnIniciarPartida").style.display = "block";
+        // Utiliza la información de totalPlayers como sea necesario en tu aplicación
+        console.log("Total de jugadores en la sala:", totalPlayers);
+    });
+
+
+    function hideColorOption(color) {
+        let id = `colorOption_${color}`;
+        let optionToHide = document.getElementById(id);
+
+        if (optionToHide) {
+            optionToHide.style.display = "none";
+        }
+    }
+
+    function showColorOption(color) {
+        let id = `colorOption_${color}`;
+        let optionToShow = document.getElementById(id);
+
+        if (optionToShow) {
+            optionToShow.style.display = "block";
+        }
+    }
+
+    function restoreSelectedOption() {
+        // Restaurar la opción previamente seleccionada en el combobox
+        var colorSelector = document.getElementById("colorSelector");
+        colorSelector.value = selectedColor;
+        highlightSelectedOption(selectedColor);
+    }
 
 </script>

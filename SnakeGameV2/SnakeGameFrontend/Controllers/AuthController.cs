@@ -59,7 +59,7 @@ namespace SnakeGameFrontend.Controllers
             var usuarioJson = JsonConvert.SerializeObject(jugador);
             var cookieOptions = new CookieOptions
             {
-                Expires = DateTimeOffset.UtcNow.AddHours(1), // Define la expiración
+                //Expires = DateTimeOffset.UtcNow.AddHours(1), // Define la expiración
                 IsEssential = true // Marcar como esencial
             };
             Response.Cookies.Append("JugadorCookie", usuarioJson, cookieOptions);

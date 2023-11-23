@@ -90,12 +90,32 @@ namespace SnakeGameFrontend.Controllers
         private string[] getColors(int? cantidad)
         {
             //genera colores hexadesimales aleatorios
-            Random randomGen = new Random();
-            string[] colors = new string[(int) cantidad];
-            for (int i = 0; i < cantidad; i++)
-            {
-                colors[i] = String.Format("#{0:X6}", randomGen.Next(0x1000000));
-            }
+            //Random randomGen = new Random();
+            //string[] colors = new string[(int) cantidad];
+            //for (int i = 0; i < cantidad; i++)
+            //{
+            //    //colors[i] = String.Format("#{0:X6}", randomGen.Next(0x1000000));
+            //    //una lista de 5 colores
+            //}
+            //una lista de colores fijos
+            string[] colors = new string[15];
+            colors[0] = "#FF0000";
+            colors[1] = "#00FF00";
+            colors[2] = "#0000FF";
+            colors[3] = "#FFFF00";
+            colors[4] = "#00FFFF";
+            colors[5] = "#FF00FF";
+            colors[6] = "#FF8000";
+            colors[7] = "#8000FF";
+            colors[8] = "#00FF80";
+            colors[9] = "#FF0080";
+            colors[10] = "#0080FF";
+            colors[11] = "#FF80FF";
+            colors[12] = "#80FF00";
+            colors[13] = "#8123FF";
+            colors[14] = "#FF8080";
+
+
             return colors;
         }
     }

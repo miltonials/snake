@@ -137,7 +137,7 @@ CREATE VIEW PartidasEnEspera AS
 		P.CantidadJugadores,
 		COUNT(JXP.JugadorID) JugadoresConectados
 	FROM Partidas P
-	INNER JOIN JugadoresXPartida JXP ON JXP.PartidaId = P.PartidaID
+	LEFT JOIN JugadoresXPartida JXP ON JXP.PartidaId = P.PartidaID
 	WHERE 
 		P.Estado = 0
 	GROUP BY P.PartidaId,P.CodigoIdentificador,TipoJuego,Tematica,CantidadJugadores
@@ -349,6 +349,10 @@ ELSE
 BEGIN
     PRINT 'El procedimiento almacenado no existe.';
 END
+
+
+
+
 
 
 DECLARE @CodigoIdentificador NVARCHAR(10) = 'AHH563';
