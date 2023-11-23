@@ -273,5 +273,50 @@ namespace SnakeGameBackend.Controllers
             return jugadoresEnPartida;
         }
 
+        /*
+         sp_AsociarColorJugadorEnPartida (
+        @CodigoIdentificador NVARCHAR(10),
+        @Nickname NVARCHAR(50),
+        @ColorSerpiente NVARCHAR(20)
+         */
+        [HttpPost("AsociarColorJugadorEnPartida")]
+        public void AsociarColorJugadorEnPartida(string codigoIdentificador, string nickname, string colorSerpiente)
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("sp_AsociarColorJugadorEnPartida", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            command.Parameters.AddWithValue("@CodigoIdentificador", codigoIdentificador);
+            command.Parameters.AddWithValue("@Nickname", nickname);
+            command.Parameters.AddWithValue("@ColorSerpiente", colorSerpiente);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+
+        //sp_ObtenerJugadoresListos
+        [HttpGet("jugadoresListos")]
+        public int JugadoresListos(string codigoIdentificador)
+        {
+            int jugadoresListos = 0;
+
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("sp_ObtenerJugadoresListos", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            command.Parameters.AddWithValue("@CodigoIdentificador", codigoIdentificador);
+
+            using SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                jugadoresListos = Convert.ToInt32(reader["jugadoresListos"]);
+            }
+
+            return jugadoresListos;
+        }
     }
 }

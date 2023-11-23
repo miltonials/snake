@@ -350,8 +350,67 @@ BEGIN
     PRINT 'El procedimiento almacenado no existe.';
 END
 
+CREATE PROCEDURE sp_ObtenerJugadoresListos (
+    @CodigoIdentificador NVARCHAR(50)
+)
+AS
+BEGIN
+	--EXEC sp_ObtenerJugadoresListos @CodigoIdentificador = 'd7b5ce9b-7'
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS jugadoresListos
+    FROM Partidas p
+    LEFT JOIN JugadoresXPartida jp ON p.PartidaID = jp.PartidaID
+    WHERE p.CodigoIdentificador = @CodigoIdentificador AND jp.ColorSerpiente != 'ND';
+END;
 
 
+CREATE PROCEDURE sp_AsociarColorJugadorEnPartida (
+    @CodigoIdentificador NVARCHAR(10),
+    @Nickname NVARCHAR(50),
+    @ColorSerpiente NVARCHAR(20)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @JugadorID INT;
+    DECLARE @PartidaID INT;
+
+    -- Obtener el ID del jugador
+    SELECT @JugadorID = JugadorID
+    FROM Jugadores
+    WHERE LOWER(Nickname) = LOWER(@Nickname);
+
+    -- Obtener el ID de la partida
+    SELECT @PartidaID = PartidaID
+    FROM Partidas
+    WHERE CodigoIdentificador = @CodigoIdentificador;
+
+    -- Actualizar el color del jugador en la partida
+    IF @JugadorID IS NOT NULL AND @PartidaID IS NOT NULL
+    BEGIN
+        IF EXISTS (SELECT 1 FROM JugadoresXPartida WHERE PartidaID = @PartidaID AND JugadorID = @JugadorID)
+        BEGIN
+            -- El registro ya existe, realizar una actualización
+            UPDATE JugadoresXPartida
+            SET ColorSerpiente = @ColorSerpiente
+            WHERE PartidaID = @PartidaID AND JugadorID = @JugadorID;
+        END
+        ELSE
+        BEGIN
+            -- El registro no existe, realizar una inserción
+            INSERT INTO JugadoresXPartida (PartidaID, JugadorID, ColorSerpiente)
+            VALUES (@PartidaID, @JugadorID, @ColorSerpiente);
+        END
+    END
+END;
+
+
+--DELETE jxp
+--FROM JugadoresXPartida jxp
+--JOIN Partidas p ON jxp.PartidaID = p.PartidaID
+--WHERE p.Estado = 0;
 
 
 

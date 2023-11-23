@@ -29,12 +29,13 @@
         <div class="row">
             <div class="col-md-12">
                 <button id="btnSend" class="btn btn-primary">Enviar</button>
+                <div id="btnInicioContainer"></div>
             </div>
         </div>
     </div>
 </div>
 
-<button id="btnIniciarPartida" class="btn btn-outline-success">Iniciar partida</button>
+
 
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script>
@@ -94,7 +95,6 @@
                     return console.error(err.toString());
                 });
         } else {
-            document.getElementById("btnIniciarPartida").style.display = "none";
             partida.jugadoresConectados -= 1;
         }
     });
@@ -135,6 +135,7 @@
     });
 
     window.addEventListener('beforeunload', function () {
+        document.getElementById("btnInicioContainer").removeChild(document.getElementById("btnIniciarPartida"));
         connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
             .catch(function (err) {
                 return console.error(err.toString());
@@ -167,10 +168,18 @@
     });
 
     connection.on("AllPlayersReady", function (totalPlayers) {
-        // Todos los jugadores están listos, mostrar el botón de iniciar partida
-        document.getElementById("btnIniciarPartida").style.display = "block";
-        // Utiliza la información de totalPlayers como sea necesario en tu aplicación
-        console.log("Total de jugadores en la sala:", totalPlayers);
+        document.getElementById("btnInicioContainer").innerHTML = "";
+        let btnIniciarPartida = document.createElement("button");
+        btnIniciarPartida.id = "btnIniciarPartida";
+        btnIniciarPartida.className = "btn btn-success";
+        btnIniciarPartida.innerHTML = "Iniciar partida";
+        //btnIniciarPartida.addEventListener("click", function () {
+        //    connection.invoke("StartGame", "Model")
+        //        .catch(function (err) {
+        //            return console.error(err.toString());
+        //        });
+        //});
+        document.getElementById("btnInicioContainer").appendChild(btnIniciarPartida);
     });
 
 

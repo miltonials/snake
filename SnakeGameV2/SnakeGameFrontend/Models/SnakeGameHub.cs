@@ -86,13 +86,14 @@ namespace SnakeGameFrontend.Models
                 playerColors.Add(user, selectedColor);
 
                 // Notificar a los demás jugadores sobre la selección de color
+                await asociarColor(room, user, selectedColor);
                 await Clients.Group(room).SendAsync("ColorSelected", user, selectedColor, true);
 
                 // Marcar al jugador como listo
                 playersReady.Add(user);
 
                 // Obtener la cantidad total de jugadores en la partida
-                int totalPlayers = GetTotalPlayersInRoom(room);
+                int totalPlayers = await GetTotalPlayersInRoom(room);
 
                 // Verificar si todos los jugadores están listos para iniciar la partida
                 if (playersReady.Count == totalPlayers)
@@ -102,12 +103,28 @@ namespace SnakeGameFrontend.Models
             }
         }
 
-        private int GetTotalPlayersInRoom(string room)
+        private async Task asociarColor(string room, string user, string selectedColor)
         {
-            // Implementa la lógica para obtener la cantidad total de jugadores en la sala
-            // Puedes acceder a tu base de datos o a cualquier otro lugar donde tengas la información
-            // En este ejemplo, se usa un valor estático, pero debes implementar esta lógica según tu aplicación.
-            return 4; // Reemplaza esto con la lógica real para obtener la cantidad de jugadores en la sala.
+            string apiUrl = Controllers.ChatController._configuration.GetValue<string>("apiUrl");
+
+            using var httpClient = new HttpClient();
+            string encodedRoom = Uri.EscapeDataString(room);
+            string encodedNickname = Uri.EscapeDataString(user);
+            string encodedColor = Uri.EscapeDataString(selectedColor);
+
+            string url = $"{apiUrl}/AsociarColorJugadorEnPartida?codigoIdentificador={room}&nickname={encodedNickname}&colorSerpiente={encodedColor}";
+            using var response = await httpClient.PostAsync(url, null);
+        }
+
+        private async Task<int> GetTotalPlayersInRoom(string room)
+        {
+            string apiUrl = Controllers.ChatController._configuration.GetValue<string>("apiUrl");
+
+            using var httpClient = new HttpClient();
+            string url = $"{apiUrl}/jugadoresListos?codigoIdentificador={room}";
+            using var response = await httpClient.GetAsync(url);
+            string apiResponse = await response.Content.ReadAsStringAsync();
+            return int.Parse(apiResponse);
         }
 
 
