@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Snake";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@{
+    int gridSize = ViewBag.CantidadJugadores * 10 ; // Tamaño del tablero basado en la cantidad de jugadores
+    int cellSize = 30; // Tamaño de cada celda
+}
+
+<div style="display: grid; grid-template-columns: repeat(@gridSize, @cellSize)">
+
+    @for (int i = 0; i < gridSize; i++)
+    {
+        for (int j = 0; j < gridSize; j++)
+        {
+            <div id="cell_@i _@j" style="width: @cellSize px; height: @cellSize px; border: 1px solid #ccc;"></div>
+        }
+    }
+
+</div>

@@ -67,7 +67,7 @@
     connection.on("JugadoresCompletos", function () {
         console.log("Cantidad de jugadores: " + @partida.CantidadJugadores);
         console.log("Jugadores conectados: " + @partida.JugadoresConectados + 1);
-            if (cantidadJugadores == jugadoresConectados + 1) {
+        if (cantidadJugadores == jugadoresConectados + 1) {
             //colocar el boton de iniciar partida
             document.getElementById("btnIniciarPartida").style.display = "block";
             jugadoresConectados += 1;
