@@ -40,6 +40,7 @@
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
     let selectedColor;
     let partida = {
         cantidadJugadores: @partida.CantidadJugadores,
@@ -69,32 +70,31 @@
         return console.error(err.toString());
     });
 
-    let cantidadJugadores = @partida.CantidadJugadores;
-    let jugadoresConectados = @partida.JugadoresConectados;
-    connection.on("JugadoresCompletos", function () {
-        console.log("Cantidad de jugadores: " + @partida.CantidadJugadores);
-        console.log("Jugadores conectados: " + @partida.JugadoresConectados + 1);
-        if (cantidadJugadores == jugadoresConectados + 1) {
-            //colocar el boton de iniciar partida
-            document.getElementById("btnIniciarPartida").style.display = "block";
-            jugadoresConectados += 1;
+    document.getElementById("colorSelector").addEventListener("change", function () {
+        let selectedColor = document.getElementById("colorSelector").value;
+        let currentColor = document.querySelector('.h-100').dataset.currentColor;
+
+        if (selectedColor !== currentColor) {
+            highlightSelectedOption(selectedColor);
+            jugador.ColorSerpiente = selectedColor;
+            connection.invoke("ColorSelected", "@Model", "@jugador.Nickname", selectedColor)
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        } else {
+            console.log("¡Ya has seleccionado ese color!");
         }
     });
 
-    connection.on("ColorOccupied", function (occupiedColor) {
-        // Notificar al usuario que el color está ocupado
-        alert(`¡El color ${occupiedColor} ya está ocupado! Selecciona otro color.`);
-        // Restaurar la opción previamente seleccionada en el combobox
-        restoreSelectedOption();
-    });
-
     connection.on("JugadoresCompletos", function () {
+        console.log(partida);
         if (partida.cantidadJugadores == partida.jugadoresConectados + 1) {
             connection.invoke("ShowColors")
                 .catch(function (err) {
                     return console.error(err.toString());
                 });
         } else {
+            document.getElementById("btnIniciarPartida").style.display = "none";
             partida.jugadoresConectados -= 1;
         }
     });
@@ -110,11 +110,20 @@
         event.preventDefault();
     });
 
+    connection.on("ColorOccupied", function (occupiedColor) {
+        // Notificar al usuario que el color está ocupado
+        alert(`¡El color ${occupiedColor} ya está ocupado! Selecciona otro color.`);
+        // Restaurar la opción previamente seleccionada en el combobox
+        restoreSelectedOption();
+    });
+
     connection.on("ShowColors", function () {
+        console.log("ShowColors");
+        //document.getElementById("btnIniciarPartida").style.display = "block";
         document.getElementById("colorSelectorLabel").innerHTML = "Selecciona tu color";
         document.getElementById("colorSelectorDiv").style.display = "block";
         let colorSelector = document.getElementById("colorSelector");
-        colores.forEach(color => {
+        colores.forEach(color => {btnInicioContainer
             let option = document.createElement("option");
             option.id = `colorOption_${color}`;
             option.value = color;
@@ -130,12 +139,26 @@
         document.getElementById("messages").appendChild(msg);
     });
 
+    connection.on("AllPlayersReady", function () {
+        // Todos los jugadores están listos, mostrar el botón de iniciar partida
+        let btnInicio = document.createElement("button");
+        btnInicio.id = "btnIniciarPartida";
+        btnInicio.className = "btn btn-primary";
+        btnInicio.innerHTML = "Iniciar partida";
+        btnInicio.addEventListener("click", function () {
+            connection.invoke("StartGame", "@Model", "@jugador.Nickname")
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        });
+        document.getElementById("btnInicioContainer").appendChild(btnInicio);
+    });
+
     connection.on("RedirectTo", function (location) {
         window.location.href = location;
     });
 
     window.addEventListener('beforeunload', function () {
-        document.getElementById("btnInicioContainer").removeChild(document.getElementById("btnIniciarPartida"));
         connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
             .catch(function (err) {
                 return console.error(err.toString());
@@ -164,24 +187,7 @@
             showColorOption(selectedColor);
             selectedColor = newlySelectedColor;
         }
-        console.log(jugador);
     });
-
-    connection.on("AllPlayersReady", function (totalPlayers) {
-        document.getElementById("btnInicioContainer").innerHTML = "";
-        let btnIniciarPartida = document.createElement("button");
-        btnIniciarPartida.id = "btnIniciarPartida";
-        btnIniciarPartida.className = "btn btn-success";
-        btnIniciarPartida.innerHTML = "Iniciar partida";
-        //btnIniciarPartida.addEventListener("click", function () {
-        //    connection.invoke("StartGame", "Model")
-        //        .catch(function (err) {
-        //            return console.error(err.toString());
-        //        });
-        //});
-        document.getElementById("btnInicioContainer").appendChild(btnIniciarPartida);
-    });
-
 
     function hideColorOption(color) {
         let id = `colorOption_${color}`;
