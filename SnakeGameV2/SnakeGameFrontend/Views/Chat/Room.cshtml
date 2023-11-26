@@ -37,7 +37,8 @@
 
 
 
-<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+@*<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>*@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
@@ -146,7 +147,8 @@
         btnInicio.className = "btn btn-primary";
         btnInicio.innerHTML = "Iniciar partida";
         btnInicio.addEventListener("click", function () {
-            connection.invoke("StartGame", "@Model", "@jugador.Nickname")
+            //redireccionar a la ruta /play/{roomId}
+            connection.invoke("RedirectTo", "/play/" + partida.roomId)
                 .catch(function (err) {
                     return console.error(err.toString());
                 });
