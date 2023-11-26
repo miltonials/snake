@@ -34,12 +34,13 @@ namespace SnakeGameFrontend.Models
             await Clients.Group(room).SendAsync("ReceiveMessage", "Server", $"{user} ha abandonado la sala.");
         }
 
-        public async Task Start(string room)
+        public async Task RedirectTo(string room)
         {
-            //TODO: modificar para redireccionar a la pagina donde estará la partida
-            //el metodo debe ser post para que no se inicie antes de que todos los jugadores esten listos
-            await Clients.Group(room).SendAsync("RedirectTo", "/snakeGame?room=" + room);
+            // TODO: Modificar para redireccionar a la página donde estará la partida
+            // El método debe ser POST para que no se inicie antes de que todos los jugadores estén listos
+            await Clients.Group(room).SendAsync("RedirectTo", "/play?room=" + room);
         }
+
 
         private async Task AddPlayer(string room, string nickname)
         {

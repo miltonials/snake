@@ -406,11 +406,11 @@ BEGIN
     END
 END;
 
-
---DELETE jxp
---FROM JugadoresXPartida jxp
---JOIN Partidas p ON jxp.PartidaID = p.PartidaID
---WHERE p.Estado = 0;
+exec sp_ObtenerJugadoresEnPartida 'd235277e-f'
+DELETE jxp
+FROM JugadoresXPartida jxp
+JOIN Partidas p ON jxp.PartidaID = p.PartidaID
+WHERE p.Estado = 0;
 
 
 

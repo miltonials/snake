@@ -142,19 +142,35 @@
 
     connection.on("AllPlayersReady", function () {
         // Todos los jugadores están listos, mostrar el botón de iniciar partida
+        let btnInicioContainer = document.getElementById("btnInicioContainer");
+
+        if (!btnInicioContainer) {
+            btnInicioContainer = document.createElement("div");
+            btnInicioContainer.id = "btnInicioContainer";
+            document.body.appendChild(btnInicioContainer);
+        }
+
+        //solo agregar el boton si no existe
+        if (document.getElementById("btnIniciarPartida")) {
+            return;
+        }
+
         let btnInicio = document.createElement("button");
         btnInicio.id = "btnIniciarPartida";
         btnInicio.className = "btn btn-primary";
         btnInicio.innerHTML = "Iniciar partida";
         btnInicio.addEventListener("click", function () {
-            //redireccionar a la ruta /play/{roomId}
-            connection.invoke("RedirectTo", "/play/" + partida.roomId)
+            // Redireccionar a la ruta /play/{roomId}
+            connection.invoke("RedirectTo", partida.roomId)
                 .catch(function (err) {
                     return console.error(err.toString());
                 });
         });
-        document.getElementById("btnInicioContainer").appendChild(btnInicio);
+
+        btnInicioContainer.innerHTML = ""; // Limpiar cualquier contenido existente
+        btnInicioContainer.appendChild(btnInicio);
     });
+
 
     connection.on("RedirectTo", function (location) {
         window.location.href = location;
