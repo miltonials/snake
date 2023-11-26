@@ -147,7 +147,7 @@ namespace SnakeGameBackend.Controllers
                 registro.Tipo = Convert.ToInt32(reader["TipoJuego"]);
                 try
                 {
-                    registro.Largo = Convert.ToInt32(reader["TiempoRestante"]);
+                    registro.Tiempo = Convert.ToInt32(reader["TiempoRestante"]);
                 }
                 catch (Exception e)
                 {

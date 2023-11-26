@@ -17,11 +17,28 @@ namespace SnakeGameFrontend.Controllers
         {
             ViewBag.Jugador = AuthController.GetPlayerSession(_contextAccessor);
             IEnumerable<Jugador> jugadores = GetRoomPlayers(roomId).Result;
+            // guardar la partidad(objeto) actual en un viewbag 
+            Partida partida = GetPartidadActual(roomId).Result;
+            ViewBag.partidadActual = partida;
             //conseguir numero de jugadores
             ViewBag.RoomId = roomId;
             ViewBag.Jugadores = jugadores;
             ViewBag.CantidadJugadores = jugadores.Count();
             return View();
+        }
+
+        private async Task<Partida> GetPartidadActual(string roomId)
+        {
+            //ejecutar metodo de la api, el metodo se llama GetPartida
+            string apiUrl = _configuration.GetValue<string>("apiUrl");
+            using var httpClient = new HttpClient();
+            string encodedRoomId = Uri.EscapeDataString(roomId);
+            string url = $"{apiUrl}/GetPartida?codigoIdentificador={encodedRoomId}";
+            using var response = await httpClient.GetAsync(url);
+            string apiResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Partida>(apiResponse);
+
+
         }
 
         private async Task<IEnumerable<Jugador>> GetRoomPlayers(string roomId)

@@ -5,11 +5,29 @@
     SnakeGameBackend.Models.Jugador jugadorActual = ViewBag.Jugador;
     string roomId = ViewBag.RoomId;
     int gridSize = cantidadJugadores * 10;
-    int largoObjetivo = 10;
-    int minutosPartida = 1;
+    bool isLargo = ViewBag.partidadActual.Tipo == 2;// is true if the game is by length
+    int largoObjetivo = 0;
+    int minutosPartida = 0;
+    if (isLargo)
+    {
+        largoObjetivo = ViewBag.partidadActual.Largo;
+    }
+    else
+    {
+        minutosPartida = ViewBag.partidadActual.Tiempo;
+    }
 }
 
 <h1>Juego de la Culebrita</h1>
+@* Mensaje que el juego se acaba cuando se alcanza el tamaño o tiempo objetivo *@
+@if(isLargo)
+{
+    <h2>El juego termina cuando la serpiente alcance un largo de @largoObjetivo</h2>
+}
+else
+{
+    <h2>El juego termina cuando se acaben los @minutosPartida minutos</h2>
+}
 
 <div id="main-container">
     <div id="game-board"></div>
