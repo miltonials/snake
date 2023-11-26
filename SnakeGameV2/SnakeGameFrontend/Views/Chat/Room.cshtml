@@ -29,8 +29,9 @@
         <div class="row">
             <div class="col-md-12">
                 <button id="btnSend" class="btn btn-primary">Enviar</button>
-                <form id="btnInicioContainer">
+                <form id="btnInicioContainer" asp-controller="Play" asp-action="Index">
                     <input type="hidden" name="roomId" value="@partida.CodigoIdentificador" />
+                    <button id="btnIniciarPartida" class="btn btn-primary" style="display:none">Iniciar partida</button>
                 </form>
             </div>
         </div>
@@ -143,42 +144,16 @@
     });
 
     connection.on("AllPlayersReady", function () {
-        // Todos los jugadores están listos, mostrar el botón de iniciar partida
-        let btnInicioContainer = document.getElementById("btnInicioContainer");
-
-        if (!btnInicioContainer) {
-            btnInicioContainer = document.createElement("div");
-            btnInicioContainer.id = "btnInicioContainer";
-            document.body.appendChild(btnInicioContainer);
-        }
-
-        //solo agregar el boton si no existe
-        if (document.getElementById("btnIniciarPartida")) {
-            return;
-        }
-
-        
-        let btnInicio = `<button id="btnIniciarPartida" class="btn btn-primary asp-controller="PlayController" asp-action="Index">Iniciar partida</button>`
-        btnInicioContainer.innerHTML = ""; // Limpiar cualquier contenido existente
-        console.log(btnInicio);
-        btnInicioContainer.appendChild(btnInicio);
-
-
-        btnInicio.addEventListener("click", function () {
-            // Redireccionar a la ruta /play/{roomId}
-            connection.invoke("RedirectTo", partida.roomId)
-                .catch(function (err) {
-                    return console.error(err.toString());
-                });
-        });
-
-        //asp-controller="PlayController" asp-action="Index"
-
-
-        btnInicioContainer.innerHTML = ""; // Limpiar cualquier contenido existente
-        btnInicioContainer.appendChild(btnInicio);
+        let btnIniciarPartida = document.getElementById("btnIniciarPartida");
+        btnIniciarPartida.style.display = "block";
     });
 
+    document.getElementById("btnIniciarPartida").addEventListener("click", function (event) {
+        connection.invoke("RedirectTo", "@Model")
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    });
 
     connection.on("RedirectTo", function (location) {
         window.location.href = location;
