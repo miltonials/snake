@@ -80,7 +80,7 @@
 
     connection.start().then(() => {
         console.log("connected");
-        connection.invoke("PrepararPartida", "@roomId", )
+        connection.invoke("PrepararPartida", "@roomId",)
             .catch(function (err) {
                 return console.error(err.toString());
             });

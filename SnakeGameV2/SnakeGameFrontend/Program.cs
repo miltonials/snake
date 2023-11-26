@@ -42,7 +42,7 @@ app.MapControllerRoute(
     pattern: "{controller=Auth}/{action=Index}");
 
 app.MapHub<SnakeGameHub>("/chat");
-app.MapHub<PlayHub>("/snakeGame");
+app.MapHub<PlayHub>("/play");
 
 
 app.Run();
