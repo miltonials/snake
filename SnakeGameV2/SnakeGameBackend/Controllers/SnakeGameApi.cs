@@ -144,27 +144,28 @@ namespace SnakeGameBackend.Controllers
             while (reader.Read())
             {
                 registro.Id = Convert.ToInt32(reader["PartidaId"]);
+                registro.CodigoIdentificador = reader["CodigoIdentificador"].ToString();
                 registro.Tipo = Convert.ToInt32(reader["TipoJuego"]);
                 try
                 {
-                    registro.Tiempo = Convert.ToInt32(reader["TiempoRestante"]);
+                    registro.Tiempo = Convert.ToInt32(reader["Tiempo"]);
                 }
                 catch (Exception e)
                 {
-                    registro.Largo = Convert.ToInt32(reader["LargoObjetivo"]);
+                    registro.Tiempo = 0;
                 }
-                registro.Tematica = Convert.ToInt32(reader["Tematica"]);
-                registro.CodigoIdentificador = reader["CodigoIdentificador"].ToString();
-                registro.Estado = Convert.ToInt32(reader["Estado"]);
-                // try para que no se caiga si no hay cantidad de jugadores
                 try
                 {
-                    registro.Cantidad = Convert.ToInt32(reader["CantidadJugadores"]);
+                    registro.Largo = Convert.ToInt32(reader["Largo"]);
                 }
                 catch (Exception e)
                 {
-                    registro.Cantidad = 0;
+                    registro.Largo = 0;
                 }
+
+                //registro.Cantidad = Convert.ToInt32(reader["Cantidad"]);
+                registro.Tematica = Convert.ToInt32(reader["Tematica"]);
+                registro.Estado = Convert.ToInt32(reader["Estado"]);
             }
 
             connection.Close();

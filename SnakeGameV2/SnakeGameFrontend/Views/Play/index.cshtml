@@ -4,38 +4,18 @@
     int cantidadJugadores = ViewBag.CantidadJugadores;
     SnakeGameBackend.Models.Jugador jugadorActual = ViewBag.Jugador;
     string roomId = ViewBag.RoomId;
-    int gridSize = cantidadJugadores * 10;
-    bool isLargo = ViewBag.partidadActual.Tipo == 2;// is true if the game is by length
-    int largoObjetivo = 0;
-    int minutosPartida = 0;
-    if (isLargo)
-    {
-        largoObjetivo = ViewBag.partidadActual.Largo;
-    }
-    else
-    {
-        minutosPartida = ViewBag.partidadActual.Tiempo;
-    }
+    int gridSize = (cantidadJugadores * 10) * (cantidadJugadores * 10);
+    int largoObjetivo = 10;
+    int minutosPartida = 1;
 }
 
 <h1>Juego de la Culebrita</h1>
-@* Mensaje que el juego se acaba cuando se alcanza el tamaño o tiempo objetivo *@
-@if(isLargo)
-{
-    <h2>El juego termina cuando la serpiente alcance un largo de @largoObjetivo</h2>
-}
-else
-{
-    <h2>El juego termina cuando se acaben los @minutosPartida minutos</h2>
-}
 
 <div id="main-container">
     <div id="game-board"></div>
     <div id="game-info"></div>
 </div>
 
-@*<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>*@
-@*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.13/signalr.min.js"></script>*@
 <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/play").build();
@@ -53,20 +33,43 @@ else
         <text>
             {
                 Nickname: "@jugador.Nickname",
-                ColorSerpiente: "@jugador.ColorSerpiente"
+                ColorSerpiente: "@jugador.ColorSerpiente",
+                Direccion: "W",//W (arriba), A (izquierda), S (abajo), D (derecha))
             },
         </text>
     }
         ];
 
     function crearMatriz() {
-        // Crear matriz de número de jugadores * 10
-        for (let i = 0; i < partida.cantidadJugadores; i++) {
+        //crear matriz
+        for (let i = 0; i < @gridSize; i++) {
             matriz.push([]);
-            for (let j = 0; j < 10; j++) {
+            for (let j = 0; j < @gridSize; j++) {
                 matriz[i].push(0);
             }
         }
+        console.log(matriz);
+        //colocar comida (una manzana por cada jugador)
+        for (let i = 0; i < @cantidadJugadores; i++) {
+            let x = Math.floor(Math.random() * @gridSize);
+            let y = Math.floor(Math.random() * @gridSize);
+            if (matriz[x][y] == 0) {
+                matriz[x][y] = 1;
+            } else {
+                i--;
+            }
+        }
+        //colocar serpientes
+        for (let i = 0; i < jugadores.length; i++) {
+            let x = Math.floor(Math.random() * @gridSize);
+            let y = Math.floor(Math.random() * @gridSize);
+            if (matriz[x][y] == 0) {
+                matriz[x][y] = 2;
+            } else {
+                i--;
+            }
+        }
+
         // Dibujar matriz
         mostrarMatriz();
     }
@@ -80,9 +83,6 @@ else
                 div.classList.add("cell");
                 if (matriz[i][j] == 0) {
                     div.classList.add("empty");
-                    //css
-                    div.style.backgroundColor = "white";
-                    div.style.border = "1px solid black";
                 } else if (matriz[i][j] == 1) {
                     div.classList.add("food");
                     div.innerHTML = "🍎";
@@ -91,6 +91,8 @@ else
                     div.innerHTML = "O"
                     div.style.color 
                 }
+                div.style.backgroundColor = "white";
+                div.style.border = "1px solid black";
                 board.appendChild(div);
             }
         }
@@ -98,7 +100,7 @@ else
 
     connection.start().then(() => {
         console.log("connected");
-        connection.invoke("PrepararPartida", "@roomId",)
+        connection.invoke("PrepararPartida", "@roomId", "@jugadorActual.Nickname")
             .catch(function (err) {
                 return console.error(err.toString());
             });
@@ -107,8 +109,10 @@ else
     });
 
     connection.on("CargarDatosJugador", function () {
-        crearMatriz();
-
+        if (jugadores.length == partida.cantidadJugadores) {
+            crearMatriz();
+            console.log("Todos los jugadores han cargado sus datos.");
+        }
     });
 
     connection.on("PartidaPreparada", function () {

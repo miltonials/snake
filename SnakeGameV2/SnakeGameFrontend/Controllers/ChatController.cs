@@ -51,7 +51,7 @@ namespace SnakeGameFrontend.Controllers
             return View("Room", room);
         }
 
-        private async Task<IEnumerable<PartidaEnEspera>?> GetPartidasAsync()
+        public static async Task<IEnumerable<PartidaEnEspera>?> GetPartidasAsync()
         {
             IEnumerable<PartidaEnEspera>? partidas = null;
             string apiUrl = _configuration.GetValue<string>("apiUrl");
