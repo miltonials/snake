@@ -30,7 +30,7 @@
             <div class="col-md-12">
                 <button id="btnSend" class="btn btn-primary">Enviar</button>
                 <form id="btnInicioContainer" asp-controller="Play" asp-action="Index">
-                    <input type="hidden" name="roomId" value="@partida.CodigoIdentificador" />
+                    <input type="hidden" id="roomId" name="roomId" value="@partida.CodigoIdentificador" />
                     <button id="btnIniciarPartida" class="btn btn-primary" style="display:none">Iniciar partida</button>
                 </form>
             </div>
@@ -149,7 +149,7 @@
     });
 
     document.getElementById("btnIniciarPartida").addEventListener("click", function (event) {
-        connection.invoke("RedirectTo", "@Model")
+        connection.invoke("RedirectTo", "/play?roomId=@Model")
             .catch(function (err) {
                 return console.error(err.toString());
             });
@@ -214,8 +214,16 @@
         colorSelector.value = selectedColor;
         highlightSelectedOption(selectedColor);
     }
+    // Código para cerrar la partida al cerrar la ventana
+    window.addEventListener('beforeunload', function () {
+        // Llamada a la función CloseRoom al cerrar la ventana
+        connection.invoke("CloseRoom", partida.roomId)
+            .catch(function (err) {
+               return console.error(err.toString());
+            });
+    });
 
-    // Agrega el código para cerrar la ventana y redirigir al usuario después de 3 minutos
+    // Código para cerrar la ventana y redirigir al usuario después de 3 minutos
     setTimeout(function () {
         // Redireccionar al usuario al home después de 3 minutos
         window.location.href = "/home";

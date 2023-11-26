@@ -87,6 +87,17 @@ namespace SnakeGameFrontend.Controllers
             return jugadores;
         }
 
+        // funcion que cierra la partida
+        public async Task<IActionResult> CloseRoom(string room)
+        {
+            string apiUrl = _configuration.GetValue<string>("apiUrl");
+            using (var httpClient = new HttpClient())
+            {
+                using var response = await httpClient.GetAsync($"{apiUrl}/CerrarPartida?identificadorPartida={room}");
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
         private string[] getColors(int? cantidad)
         {
             //genera colores hexadesimales aleatorios
