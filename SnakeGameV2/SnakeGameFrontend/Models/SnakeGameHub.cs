@@ -38,7 +38,7 @@ namespace SnakeGameFrontend.Models
         {
             // TODO: Modificar para redireccionar a la página donde estará la partida
             // El método debe ser POST para que no se inicie antes de que todos los jugadores estén listos
-            await Clients.Group(room).SendAsync("RedirectTo", "/play?room=" + room);
+            await Clients.Group(room).SendAsync("RedirectTo", "/play?roomId=" + room);
         }
 
 

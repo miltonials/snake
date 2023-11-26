@@ -29,10 +29,10 @@
         <div class="row">
             <div class="col-md-12">
                 <button id="btnSend" class="btn btn-primary">Enviar</button>
-                <form id="btnInicioContainer" asp-controller="Play" asp-action="Index">
-                    <input type="hidden" id="roomId" name="roomId" value="@partida.CodigoIdentificador" />
+                <div id="btnInicioContainer">
+                    @*<input type="hidden" id="roomId" name="roomId" value="@partida.CodigoIdentificador" />*@
                     <button id="btnIniciarPartida" class="btn btn-primary" style="display:none">Iniciar partida</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -149,7 +149,7 @@
     });
 
     document.getElementById("btnIniciarPartida").addEventListener("click", function (event) {
-        connection.invoke("RedirectTo", "/play?roomId=@Model")
+        connection.invoke("RedirectTo", "@Model")
             .catch(function (err) {
                 return console.error(err.toString());
             });
