@@ -41,8 +41,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Index}");
 
-//app.MapHub<SnakeGameHub>("/snakeGame");
 app.MapHub<SnakeGameHub>("/chat");
+app.MapHub<PlayHub>("/snakeGame");
 
 
 app.Run();

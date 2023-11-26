@@ -127,7 +127,5 @@ namespace SnakeGameFrontend.Models
             string apiResponse = await response.Content.ReadAsStringAsync();
             return int.Parse(apiResponse);
         }
-
-
     }
 }

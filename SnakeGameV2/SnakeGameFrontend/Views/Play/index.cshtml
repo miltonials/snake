@@ -1,22 +1,113 @@
 ﻿@{
     ViewData["Title"] = "Snake";
+    IEnumerable<SnakeGameBackend.Models.Jugador> jugadores = ViewBag.Jugadores;
+    int cantidadJugadores = ViewBag.CantidadJugadores;
+    SnakeGameBackend.Models.Jugador jugadorActual = ViewBag.Jugador;
+    string roomId = ViewBag.RoomId;
+    int gridSize = cantidadJugadores * 10;
+    int largoObjetivo = 10;
+    int minutosPartida = 1;
 }
 
-<h2>@ViewData["Title"]</h2>
+<h1>Juego de la Culebrita</h1>
 
-@{
-    int gridSize = ViewBag.CantidadJugadores * 10 ; // Tamaño del tablero basado en la cantidad de jugadores
-    int cellSize = 30; // Tamaño de cada celda
-}
+<div id="main-container">
+    <div id="game-board"></div>
+    <div id="game-info"></div>
+</div>
 
-<div style="display: grid; grid-template-columns: repeat(@gridSize, @cellSize)">
+@*<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>*@
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.13/signalr.min.js"></script>*@
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/play").build();
 
-    @for (int i = 0; i < gridSize; i++)
+    let matriz = [];
+
+    let partida = {
+        cantidadJugadores: @cantidadJugadores,
+        roomId: "@roomId"
+    };
+
+    let jugadores = [
+    @foreach (var jugador in jugadores)
     {
-        for (int j = 0; j < gridSize; j++)
-        {
-            <div id="cell_@i _@j" style="width: @cellSize px; height: @cellSize px; border: 1px solid #ccc;"></div>
+        <text>
+            {
+                Nickname: "@jugador.Nickname",
+                ColorSerpiente: "@jugador.ColorSerpiente"
+            },
+        </text>
+    }
+        ];
+
+    function crearMatriz() {
+        // Crear matriz de número de jugadores * 10
+        for (let i = 0; i < partida.cantidadJugadores; i++) {
+            matriz.push([]);
+            for (let j = 0; j < 10; j++) {
+                matriz[i].push(0);
+            }
+        }
+        // Dibujar matriz
+        mostrarMatriz();
+    }
+
+    function mostrarMatriz() {
+        let board = document.getElementById("game-board");
+        board.innerHTML = "";
+        for (let i = 0; i < matriz.length; i++) {
+            for (let j = 0; j < matriz[i].length; j++) {
+                let div = document.createElement("div");
+                div.classList.add("cell");
+                if (matriz[i][j] == 0) {
+                    div.classList.add("empty");
+                    //css
+                    div.style.backgroundColor = "white";
+                    div.style.border = "1px solid black";
+                } else if (matriz[i][j] == 1) {
+                    div.classList.add("food");
+                    div.innerHTML = "🍎";
+                } else {
+                    div.classList.add("snake");
+                    div.innerHTML = "O"
+                    div.style.color 
+                }
+                board.appendChild(div);
+            }
         }
     }
 
-</div>
+    connection.start().then(() => {
+        console.log("connected");
+        connection.invoke("PrepararPartida", "@roomId", )
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    connection.on("CargarDatosJugador", function () {
+        crearMatriz();
+
+    });
+
+    connection.on("PartidaPreparada", function () {
+        console.log("La partida está preparada. Presiona 'u' para iniciar.");
+    });
+
+    connection.on("PartidaIniciada", function () {
+        console.log("¡La partida ha comenzado!");
+        // Agregar lógica para iniciar el juego (por ejemplo, crear serpientes y alimentos).
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key == "u") {
+            connection.invoke("IniciarPartida", "@roomId")
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+    });
+</script>

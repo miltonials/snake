@@ -29,7 +29,9 @@
         <div class="row">
             <div class="col-md-12">
                 <button id="btnSend" class="btn btn-primary">Enviar</button>
-                <div id="btnInicioContainer"></div>
+                <form id="btnInicioContainer">
+                    <input type="hidden" name="roomId" value="@partida.CodigoIdentificador" />
+                </form>
             </div>
         </div>
     </div>
@@ -37,8 +39,8 @@
 
 
 
-@*<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>*@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>*@
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
@@ -155,10 +157,13 @@
             return;
         }
 
-        let btnInicio = document.createElement("button");
-        btnInicio.id = "btnIniciarPartida";
-        btnInicio.className = "btn btn-primary";
-        btnInicio.innerHTML = "Iniciar partida";
+        
+        let btnInicio = `<button id="btnIniciarPartida" class="btn btn-primary asp-controller="PlayController" asp-action="Index">Iniciar partida</button>`
+        btnInicioContainer.innerHTML = ""; // Limpiar cualquier contenido existente
+        console.log(btnInicio);
+        btnInicioContainer.appendChild(btnInicio);
+
+
         btnInicio.addEventListener("click", function () {
             // Redireccionar a la ruta /play/{roomId}
             connection.invoke("RedirectTo", partida.roomId)
@@ -166,6 +171,9 @@
                     return console.error(err.toString());
                 });
         });
+
+        //asp-controller="PlayController" asp-action="Index"
+
 
         btnInicioContainer.innerHTML = ""; // Limpiar cualquier contenido existente
         btnInicioContainer.appendChild(btnInicio);
