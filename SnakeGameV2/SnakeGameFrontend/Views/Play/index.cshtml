@@ -40,40 +40,6 @@
     }
         ];
 
-    function crearMatriz() {
-        matriz = [];
-        //crear matriz
-        for (let i = 0; i < @gridSize; i++) {
-            matriz.push([]);
-            for (let j = 0; j < @gridSize; j++) {
-                matriz[i].push(0);
-            }
-        }
-        console.log(matriz);
-        //colocar comida (una manzana por cada jugador)
-        for (let i = 0; i < @cantidadJugadores; i++) {
-            let x = Math.floor(Math.random() * @gridSize);
-            let y = Math.floor(Math.random() * @gridSize);
-            if (matriz[x][y] == 0) {
-                matriz[x][y] = 1;
-            } else {
-                i--;
-            }
-        }
-        //colocar serpientes
-        for (let i = 0; i < jugadores.length; i++) {
-            let x = Math.floor(Math.random() * @gridSize);
-            let y = Math.floor(Math.random() * @gridSize);
-            if (matriz[x][y] == 0) {
-                matriz[x][y] = 2;
-            } else {
-                i--;
-            }
-        }
-
-        // Dibujar matriz
-        mostrarMatriz();
-    }
 
     function mostrarMatriz() {
         let board = document.getElementById("game-board");
@@ -118,9 +84,18 @@
 
     connection.on("CargarDatosJugador", function () {
         if (jugadores.length == partida.cantidadJugadores) {
-            crearMatriz();
+            connection.invoke("CreateBoard", "@roomId")
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+            //crearMatriz();
             console.log("Todos los jugadores han cargado sus datos.");
         }
+    });
+
+    connection.on("CargarTablero", function (pMatriz) {
+        matriz = pMatriz;
+        mostrarMatriz();
     });
 
     connection.on("PartidaPreparada", function () {

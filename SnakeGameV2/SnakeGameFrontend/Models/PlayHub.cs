@@ -1,41 +1,123 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using SnakeGameBackend.Models;
+﻿using Microsoft.AspNetCore.SignalR;
+using SnakeGameFrontend.Controllers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SnakeGameFrontend.Models
 {
     public class PlayHub : Hub
     {
-        private async Task RemovePlayer(string room, string nickname)
-        {
-            string apiUrl = Controllers.ChatController._configuration.GetValue<string>("apiUrl");
+        private static Dictionary<string, string> playerColors = new Dictionary<string, string>();
+        private static HashSet<string> playersReady = new HashSet<string>();
+        private List<List<int>> tablero;
 
-            using var httpClient = new HttpClient();
-            string encodedRoom = Uri.EscapeDataString(room);
-            string encodedNickname = Uri.EscapeDataString(nickname);
 
-            string url = $"{apiUrl}/AbandonarPartida?identificadorPartida={room}&nickname={encodedNickname}";
-            using var response = await httpClient.PostAsync(url, null);
-        }
-
-        //metodos de la partida para ./play
         public async Task PrepararPartida(string room, string nickName)
         {
-            await AddPlayer(room, nickName);
             await Groups.AddToGroupAsync(Context.ConnectionId, room);
             await Clients.Group(room).SendAsync("CargarDatosJugador");
         }
 
-        private async Task AddPlayer(string room, string nickname)
+        public async Task CreateBoard(string room)
         {
-            Console.WriteLine($"AddPlayer: {room}, {nickname}\n\n\n\n\n");
-            string apiUrl = Controllers.ChatController._configuration.GetValue<string>("apiUrl");
+            IEnumerable<SnakeGameBackend.Models.Jugador> jugadores = await PlayController.GetRoomPlayers(room);
+            Console.WriteLine($"CreateBoard: {room}\n\n\n\n\n");
+            int nJugadores = jugadores.Count();
+            int nCasillas = 10 * nJugadores;
+            tablero = new List<List<int>>();
 
-            using var httpClient = new HttpClient();
-            string encodedRoom = Uri.EscapeDataString(room);
-            string encodedNickname = Uri.EscapeDataString(nickname);
-            string url = $"{apiUrl}/UnirsePartida?identificadorPartida={room}&nickname={encodedNickname}&colorSerpiente=ND";
-            using var response = await httpClient.PostAsync(url, null);
+
+            // Inicializar tablero
+            for (int i = 0; i < nCasillas; i++)
+            {
+                List<int> fila = new List<int>();
+                for (int j = 0; j < nCasillas; j++)
+                {
+                    fila.Add(0);
+                }
+                tablero.Add(fila);
+            }
+
+
+            // Colocar serpientes
+            int contador = 1;
+            foreach (SnakeGameBackend.Models.Jugador jugador in jugadores)
+            {
+                int x = 0;
+                int y = 0;
+                int largo = jugador.LargoSerpiente ?? 0;
+                string direccion = "derecha";
+
+                switch (contador)
+                {
+                    case 1:
+                        x = 0;
+                        y = 0;
+                        direccion = "derecha";
+                        break;
+                    case 2:
+                        x = nCasillas - 1;
+                        y = 0;
+                        direccion = "abajo";
+                        break;
+                    case 3:
+                        x = nCasillas - 1;
+                        y = nCasillas - 1;
+                        direccion = "izquierda";
+                        break;
+                    case 4:
+                        x = 0;
+                        y = nCasillas - 1;
+                        direccion = "arriba";
+                        break;
+                }
+
+                for (int i = 0; i < largo; i++)
+                {
+                    tablero[x][y] = contador;
+                    switch (direccion)
+                    {
+                        case "derecha":
+                            x++;
+                            break;
+                        case "abajo":
+                            y++;
+                            break;
+                        case "izquierda":
+                            x--;
+                            break;
+                        case "arriba":
+                            y--;
+                            break;
+                    }
+                }
+
+
+                contador++;
+            }
+
+            // Envía el tablero al cliente
+            await Clients.Group(room).SendAsync("CargarTablero", tablero);
+            /*
+             la funcion CargarTablero es la siguiente:
+            connection.on("CargarTablero", function (tablero) {
+                console.log(tablero);
+            });
+             */
         }
+
+        /*
+         Juego: El área de juego debe disponer de lo siguiente:
+            a) Un área para poder jugar(matriz), donde inicialmente se muestran las celdas y las serpientes de los jugadores (serpientes de largo 1) se colocan en un punto aleatorio.
+            b) Por cada jugador se coloca un alimento en el tablero en una posición aleatoria. c) Una vez que inicia el juego el jugador va cambiando de direcciones, con las teclas de flechas, hacia donde se mueve la serpiente y el cuerpo se va desplazando por “el camino que ha pasado su cuerpo”.
+            d) Cada vez que una serpiente se come un alimento aparece uno nuevo en un lugar aleatorio. e) Las serpientes van creciendo de tamaño con forme comen (crecen 1 largo de celda por cada alimento). Crecen hacia adelante, según su dirección.
+            f) Las serpientes se mueven n movimientos por segundo, donde n será una variable, no alambrada, de sistema que se podrá configurar, puede iniciar en 3.
+            g) Si la serpiente “choca” contra el borde de la matriz, contra ella misma u otra serpiente (se sabe quién chocó), la serpiente pierde n tamaños (configurado también), atrás. La serpiente se detiene y debe arrancar de nuevo al momento que el usuario indique una dirección. Puede que choquen de frente, ambos se penalizan.
+            h) Se debe visualizar: a. un cronómetro que indique el tiempo restante o b. la cantidad del largo de serpiente que deben lograr.
+            i) Nombre de cada jugador en la partida con el color de serpiente. j) Indicar gane: el sistema debe validar, terminado el tiempo o si alguien logra el largo, el
+            ganador (puede existir empate).
+         */
     }
 }

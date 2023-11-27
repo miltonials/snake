@@ -274,6 +274,7 @@ namespace SnakeGameBackend.Controllers
             {
                 Jugador jugador = new()
                 {
+                    Id = Convert.ToInt32(reader["JugadorId"]),
                     Nickname = reader["Nickname"].ToString(),
                     ColorSerpiente = reader["ColorSerpiente"].ToString(),
                     LargoSerpiente = Convert.ToInt32(reader["LargoSerpiente"]),

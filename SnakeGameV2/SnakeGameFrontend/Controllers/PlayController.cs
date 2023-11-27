@@ -36,7 +36,7 @@ namespace SnakeGameFrontend.Controllers
             return View();
         }
 
-        private async Task<IEnumerable<Jugador>> GetRoomPlayers(string roomId)
+        public static async Task<IEnumerable<Jugador>> GetRoomPlayers(string roomId)
         {
             //public IEnumerable<Jugador> JugadoresEnPartida(string identificadorPartida
             string apiUrl = _configuration.GetValue<string>("apiUrl");
