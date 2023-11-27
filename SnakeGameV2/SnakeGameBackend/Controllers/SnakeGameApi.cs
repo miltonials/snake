@@ -148,7 +148,7 @@ namespace SnakeGameBackend.Controllers
                 registro.Tipo = Convert.ToInt32(reader["TipoJuego"]);
                 try
                 {
-                    registro.Tiempo = Convert.ToInt32(reader["Tiempo"]);
+                    registro.Tiempo = Convert.ToInt32(reader["TiempoRestante"]);
                 }
                 catch (Exception e)
                 {
@@ -156,7 +156,7 @@ namespace SnakeGameBackend.Controllers
                 }
                 try
                 {
-                    registro.Largo = Convert.ToInt32(reader["Largo"]);
+                    registro.Largo = Convert.ToInt32(reader["LargoObjetivo"]);
                 }
                 catch (Exception e)
                 {
@@ -166,6 +166,14 @@ namespace SnakeGameBackend.Controllers
                 //registro.Cantidad = Convert.ToInt32(reader["Cantidad"]);
                 registro.Tematica = Convert.ToInt32(reader["Tematica"]);
                 registro.Estado = Convert.ToInt32(reader["Estado"]);
+                try
+                {
+                    registro.Cantidad = Convert.ToInt32(reader["CantidadJugadores"]);
+                }
+                catch (Exception e)
+                {
+                    registro.Cantidad = 2;  
+                }
             }
 
             connection.Close();
