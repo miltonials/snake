@@ -57,6 +57,7 @@
             for (let j = 0; j < @gridSize; j++) {
                 let div = document.createElement("div");
                 div.classList.add("cell");
+                div.style.backgroundColor = "white";
                 if (matriz[i][j] == 0) {
                     div.classList.add("empty");
                 } else if (matriz[i][j] == -1) {
@@ -66,12 +67,11 @@
                     div.classList.add("snake");
                     div.innerHTML = "•";
                     //matriz[i][j] es el número del jugador que tiene la celda.
-                    console.log(matriz[i][j]);
-                    let jugador = jugadores[matriz[i][j] - 1];
-                    console.log(jugador);
-                    div.style.color = jugador.ColorSerpiente;
+                    let strId = matriz[i][j].toString();
+                    let jugador = jugadores.find(j => j.Id == strId);
+                    div.style.backgroundColor = jugador.ColorSerpiente;
+                    //div.style.color = jugador.ColorSerpiente;
                 }
-                div.style.backgroundColor = "white";
                 div.style.border = "1px solid black";
                 row.appendChild(div);
             }
