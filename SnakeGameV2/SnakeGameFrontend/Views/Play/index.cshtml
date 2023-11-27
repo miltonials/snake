@@ -4,7 +4,7 @@
     int cantidadJugadores = ViewBag.CantidadJugadores;
     SnakeGameBackend.Models.Jugador jugadorActual = ViewBag.Jugador;
     string roomId = ViewBag.RoomId;
-    int gridSize = (cantidadJugadores * 10) * (cantidadJugadores * 10);
+    int gridSize = (cantidadJugadores * 10);
     int largoObjetivo = 10;
     int minutosPartida = 1;
 }
@@ -41,6 +41,7 @@
         ];
 
     function crearMatriz() {
+        matriz = [];
         //crear matriz
         for (let i = 0; i < @gridSize; i++) {
             matriz.push([]);
@@ -77,8 +78,8 @@
     function mostrarMatriz() {
         let board = document.getElementById("game-board");
         board.innerHTML = "";
-        for (let i = 0; i < matriz.length; i++) {
-            for (let j = 0; j < matriz[i].length; j++) {
+        for (let i = 0; i < @gridSize; i++) {
+            for (let j = 0; j < @gridSize; j++) {
                 let div = document.createElement("div");
                 div.classList.add("cell");
                 if (matriz[i][j] == 0) {
@@ -88,8 +89,7 @@
                     div.innerHTML = "🍎";
                 } else {
                     div.classList.add("snake");
-                    div.innerHTML = "O"
-                    div.style.color 
+                    div.innerHTML = "•"
                 }
                 div.style.backgroundColor = "white";
                 div.style.border = "1px solid black";

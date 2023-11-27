@@ -19,11 +19,20 @@ namespace SnakeGameFrontend.Controllers
             IEnumerable<Jugador> jugadores = GetRoomPlayers(roomId).Result;
             IEnumerable<PartidaEnEspera> partidas = await ChatController.GetPartidasAsync();
             PartidaEnEspera partida = partidas.Where(p => p.CodigoIdentificador == roomId).FirstOrDefault();
+
+            //string apiUrl = Controllers.ChatController._configuration.GetValue<string>("apiUrl");
+            //using var httpClient = new HttpClient();
+            //string encodedRoom = Uri.EscapeDataString(roomId);
+            //string encodedNickname = Uri.EscapeDataString(ViewBag.Jugador.Nickname);
+            //string url = $"{apiUrl}/UnirsePartida?identificadorPartida={roomId}&nickname={encodedNickname}&colorSerpiente=ND";
+            //using var response = await httpClient.PostAsync(url, null);
+
+
             ViewBag.Partida = partida;
             //conseguir numero de jugadores
             ViewBag.RoomId = roomId;
             ViewBag.Jugadores = jugadores;
-            ViewBag.CantidadJugadores = jugadores.Count();
+            ViewBag.CantidadJugadores = partida.CantidadJugadores;
             return View();
         }
 

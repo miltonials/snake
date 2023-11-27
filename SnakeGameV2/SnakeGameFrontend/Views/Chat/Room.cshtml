@@ -159,12 +159,12 @@
         window.location.href = location;
     });
 
-    window.addEventListener('beforeunload', function () {
-        connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
-            .catch(function (err) {
-                return console.error(err.toString());
-            });
-    });
+    //window.addEventListener('beforeunload', function () {
+    //    connection.invoke("LeaveRoom", "@Model", "@jugador.Nickname")
+    //        .catch(function (err) {
+    //            return console.error(err.toString());
+    //        });
+    //});
 
     document.getElementById("colorSelector").addEventListener("change", function () {
         highlightSelectedOption();
