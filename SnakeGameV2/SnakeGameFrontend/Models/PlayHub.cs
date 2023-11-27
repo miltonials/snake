@@ -23,7 +23,7 @@ namespace SnakeGameFrontend.Models
         public async Task CreateBoard(string room)
         {
             IEnumerable<SnakeGameBackend.Models.Jugador> jugadores = await PlayController.GetRoomPlayers(room);
-            Console.WriteLine($"CreateBoard: {room}\n\n\n\n\n");
+            Console.WriteLine(jugadores.Count() + " jugadores en la sala " + room);
             int nJugadores = jugadores.Count();
             int nCasillas = 10 * nJugadores;
             tablero = new List<List<int>>();
@@ -41,61 +41,45 @@ namespace SnakeGameFrontend.Models
             }
 
 
-            // Colocar serpientes
-            int contador = 1;
+            // Colocar serpientes de los jugadores en lugares aleatorios
+            Random random = new Random();
             foreach (SnakeGameBackend.Models.Jugador jugador in jugadores)
             {
-                int x = 0;
-                int y = 0;
-                int largo = jugador.LargoSerpiente ?? 0;
-                string direccion = "derecha";
-
-                switch (contador)
+                int x = random.Next(0, nCasillas);
+                int y = random.Next(0, nCasillas);
+                if (tablero[x][y] != 0)
                 {
-                    case 1:
-                        x = 0;
-                        y = 0;
-                        direccion = "derecha";
-                        break;
-                    case 2:
-                        x = nCasillas - 1;
-                        y = 0;
-                        direccion = "abajo";
-                        break;
-                    case 3:
-                        x = nCasillas - 1;
-                        y = nCasillas - 1;
-                        direccion = "izquierda";
-                        break;
-                    case 4:
-                        x = 0;
-                        y = nCasillas - 1;
-                        direccion = "arriba";
-                        break;
-                }
-
-                for (int i = 0; i < largo; i++)
-                {
-                    tablero[x][y] = contador;
-                    switch (direccion)
+                    while (tablero[x][y] != 0)
                     {
-                        case "derecha":
-                            x++;
-                            break;
-                        case "abajo":
-                            y++;
-                            break;
-                        case "izquierda":
-                            x--;
-                            break;
-                        case "arriba":
-                            y--;
-                            break;
+                        x = random.Next(0, nCasillas);
+                        y = random.Next(0, nCasillas);
                     }
+                    tablero[x][y] = jugador.Id;
                 }
+                else
+                {
+                    tablero[x][y] = jugador.Id;
+                }
+            }
 
-
-                contador++;
+            //colocar un alimento por cada jugador en casillas que estén vacías
+            foreach (SnakeGameBackend.Models.Jugador jugador in jugadores)
+            {
+                int x = random.Next(0, nCasillas);
+                int y = random.Next(0, nCasillas);
+                if (tablero[x][y] != 0)
+                {
+                    while (tablero[x][y] != 0)
+                    {
+                        x = random.Next(0, nCasillas);
+                        y = random.Next(0, nCasillas);
+                    }
+                    tablero[x][y] = -1;
+                }
+                else
+                {
+                    tablero[x][y] = -1;
+                }
             }
 
             // Envía el tablero al cliente

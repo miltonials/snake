@@ -32,6 +32,7 @@
     {
         <text>
             {
+                Id: "@jugador.Id",
                 Nickname: "@jugador.Nickname",
                 ColorSerpiente: "@jugador.ColorSerpiente",
                 Direccion: "W",//W (arriba), A (izquierda), S (abajo), D (derecha))
@@ -58,12 +59,17 @@
                 div.classList.add("cell");
                 if (matriz[i][j] == 0) {
                     div.classList.add("empty");
-                } else if (matriz[i][j] == 1) {
+                } else if (matriz[i][j] == -1) {
                     div.classList.add("food");
                     div.innerHTML = "🍎";
                 } else {
                     div.classList.add("snake");
-                    div.innerHTML = "•"
+                    div.innerHTML = "•";
+                    //matriz[i][j] es el número del jugador que tiene la celda.
+                    console.log(matriz[i][j]);
+                    let jugador = jugadores[matriz[i][j] - 1];
+                    console.log(jugador);
+                    div.style.color = jugador.ColorSerpiente;
                 }
                 div.style.backgroundColor = "white";
                 div.style.border = "1px solid black";
@@ -95,6 +101,7 @@
 
     connection.on("CargarTablero", function (pMatriz) {
         matriz = pMatriz;
+        console.log(matriz);
         mostrarMatriz();
     });
 
