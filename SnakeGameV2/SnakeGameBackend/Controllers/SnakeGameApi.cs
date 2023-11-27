@@ -330,5 +330,16 @@ namespace SnakeGameBackend.Controllers
 
             return jugadoresListos;
         }
+
+        [HttpGet("IniciarPartida")]
+        public void IniciarPartida(string identificadorPartida)
+        {
+            MssqlSingleton mssqlSingleton = MssqlSingleton.GetInstance(_configuration);
+            using var connection = mssqlSingleton.GetConnection();
+            SqlCommand command = new("UPDATE Partidas SET Estado = 1 WHERE CodigoIdentificador = @identificadorPartida", connection);
+            command.Parameters.AddWithValue("@identificadorPartida", identificadorPartida);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
     }
 }

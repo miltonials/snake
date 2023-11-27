@@ -27,6 +27,15 @@
         roomId: "@roomId"
     };
 
+    let jugador = {
+        Id: "@jugadorActual.Id",
+        Nickname: "@jugadorActual.Nickname",
+        ColorSerpiente: "@jugadorActual.ColorSerpiente",
+        Direccion: "W", // W (arriba), A (izquierda), S (abajo), D (derecha)
+        PosicionX: 0,   // Agrega estas propiedades
+        PosicionY: 0
+    };
+
     let jugadores = [
     @foreach (var jugador in jugadores)
     {
@@ -35,7 +44,9 @@
                 Id: "@jugador.Id",
                 Nickname: "@jugador.Nickname",
                 ColorSerpiente: "@jugador.ColorSerpiente",
-                Direccion: "W",//W (arriba), A (izquierda), S (abajo), D (derecha))
+                Direccion: "W", // W (arriba), A (izquierda), S (abajo), D (derecha)
+                PosicionX: 0,   // Agrega estas propiedades
+                PosicionY: 0
             },
         </text>
     }
@@ -65,17 +76,21 @@
                     div.innerHTML = "🍎";
                 } else {
                     div.classList.add("snake");
-                    div.innerHTML = "•";
-                    //matriz[i][j] es el número del jugador que tiene la celda.
+                    div.innerHTML = "⬛";
                     let strId = matriz[i][j].toString();
                     let jugador = jugadores.find(j => j.Id == strId);
+                    //judador.PosicionX = i;
+                    //jugador.PosicionY = j;
+                    //cambiar la posicion del array del jugador
+                    jugadores.find(j => j.Id == strId).PosicionX = i;
+                    jugadores.find(j => j.Id == strId).PosicionY = j;
                     div.style.backgroundColor = jugador.ColorSerpiente;
-                    //div.style.color = jugador.ColorSerpiente;
                 }
                 div.style.border = "1px solid black";
                 row.appendChild(div);
             }
         }
+        console.log(jugadores);
     }
 
     connection.start().then(() => {
@@ -111,7 +126,13 @@
 
     connection.on("PartidaIniciada", function () {
         console.log("¡La partida ha comenzado!");
-        // Agregar lógica para iniciar el juego (por ejemplo, crear serpientes y alimentos).
+        //iniciar el movimientod de los jugadores
+        setInterval(() => {
+            connection.invoke("MoverJugadores", "@roomId", jugadores, matriz) //
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }, 1000);
     });
 
     document.addEventListener("keydown", function (event) {

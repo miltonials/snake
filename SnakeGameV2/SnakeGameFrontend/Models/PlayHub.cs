@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using SnakeGameBackend.Models;
 using SnakeGameFrontend.Controllers;
 using System;
 using System.Collections.Generic;
@@ -103,5 +104,78 @@ namespace SnakeGameFrontend.Models
             i) Nombre de cada jugador en la partida con el color de serpiente. j) Indicar gane: el sistema debe validar, terminado el tiempo o si alguien logra el largo, el
             ganador (puede existir empate).
          */
+
+        public async Task IniciarPartida(string roomId)
+        {
+            //string apiUrl = _configuration.GetValue<string>("apiUrl");
+            string apiUrl = ChatController._configuration.GetValue<string>("apiUrl");
+            using var httpClient = new HttpClient();
+            string encodedRoomId = Uri.EscapeDataString(roomId);
+            string url = $"{apiUrl}/IniciarPartida?identificadorPartida={encodedRoomId}";
+            //using var response = await httpClient.GetAsync(url);
+
+            await Clients.Group(roomId).SendAsync("PartidaIniciada");
+        }
+
+        public async Task MoverJugadores(string roomId, List<object> jugadores, int[][] tableroAct)
+        {
+            Console.WriteLine("MOVIENDO JUGADORES");
+            //convertir jugadores a lista de jugadores
+            List<Jugador> jugadoresLista = new List<Jugador>();
+            foreach (object jugador in jugadores)
+            {
+                Jugador jugadorNuevo = new Jugador();
+                jugadorNuevo.Id = (int)jugador.GetType().GetProperty("Id").GetValue(jugador);
+                jugadorNuevo.PosicionX = (int)jugador.GetType().GetProperty("PosicionX").GetValue(jugador);
+                jugadorNuevo.PosicionY = (int)jugador.GetType().GetProperty("PosicionY").GetValue(jugador);
+                jugadorNuevo.Direccion = (string)jugador.GetType().GetProperty("Direccion").GetValue(jugador);
+                jugadoresLista.Add(jugadorNuevo);
+            }
+
+            foreach (Jugador jugador in jugadoresLista)
+            {
+                int x = jugador.PosicionX;
+                int y = jugador.PosicionY;
+
+                // Actualizar la posición según la dirección
+                switch (jugador.Direccion)
+                {
+                    case "W": // Arriba
+                        x--;
+                        break;
+                    case "A": // Izquierda
+                        y--;
+                        break;
+                    case "S": // Abajo
+                        x++;
+                        break;
+                    case "D": // Derecha
+                        y++;
+                        break;
+                }
+
+                // Verifica si el nuevo movimiento está dentro de los límites del tablero
+                if (x >= 0 && x < tableroAct.Length && y >= 0 && y < tableroAct[0].Length)
+                {
+                    // Verifica si la nueva posición está vacía o contiene comida
+                    if (tableroAct[x][y] == 0 || tableroAct[x][y] == -1)
+                    {
+                        // Mueve al jugador a la nueva posición en el tablero
+                        tableroAct[x][y] = jugador.Id;
+                        tableroAct[jugador.PosicionX][jugador.PosicionY] = 0;
+
+                        // Actualiza la posición del jugador en el objeto Jugador
+                        jugador.PosicionX = x;
+                        jugador.PosicionY = y;
+                    }
+                    // Aquí puedes agregar lógica adicional para manejar otros escenarios (colisión con otras serpientes, etc.)
+                }
+                // Puedes manejar la situación en la que el nuevo movimiento está fuera de los límites del tablero si lo deseas
+            }
+
+            // Envía el tablero actualizado al cliente
+            await Clients.Group(roomId).SendAsync("CargarTablero", tableroAct);
+        }
+
     }
 }
